@@ -1,0 +1,28 @@
+^C:\USERS\SHAKIB\PROJECTS\OFFICE\BASEBALL_AI\BASEBALL_AI\BUILD\WINDOWS\X64\CMAKEFILES\E368B27C1AEA765E8C436F8C73877433\FLUTTER_WINDOWS.DLL.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\flutter PROJECT_DIR=C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai FLUTTER_ROOT=C:\flutter FLUTTER_EPHEMERAL_DIR=C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\windows\flutter\ephemeral PROJECT_DIR=C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai FLUTTER_TARGET=C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\lib\main.dart DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false PACKAGE_CONFIG=C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\.dart_tool\package_config.json C:/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\SHAKIB\PROJECTS\OFFICE\BASEBALL_AI\BASEBALL_AI\BUILD\WINDOWS\X64\CMAKEFILES\48B32ACDE8B91C2A32DCF20691A0C7C3\FLUTTER_ASSEMBLE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\SHAKIB\PROJECTS\OFFICE\BASEBALL_AI\BASEBALL_AI\WINDOWS\FLUTTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Shakib/Projects/office/baseball_ai/baseball_ai/windows -BC:/Users/Shakib/Projects/office/baseball_ai/baseball_ai/build/windows/x64 --check-stamp-file C:/Users/Shakib/Projects/office/baseball_ai/baseball_ai/build/windows/x64/flutter/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,10 @@
+^C:\USERS\SHAKIB\PROJECTS\OFFICE\BASEBALL_AI\BASEBALL_AI\BUILD\WINDOWS\X64\CMAKEFILES\8CAA49E0706C8EDEC15E16B1B75C75AE\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/Shakib/Projects/office/baseball_ai/baseball_ai/windows -BC:/Users/Shakib/Projects/office/baseball_ai/baseball_ai/build/windows/x64 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Shakib/Projects/office/baseball_ai/baseball_ai/build/windows/x64/baseball_ai.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

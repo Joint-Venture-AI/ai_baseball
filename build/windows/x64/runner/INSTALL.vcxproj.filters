@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\build\windows\x64\CMakeFiles\43c5bc0d171ab22297c0772ba21c9eef\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C9F27C52-CE83-3240-9A0A-7BCB7F109AD6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

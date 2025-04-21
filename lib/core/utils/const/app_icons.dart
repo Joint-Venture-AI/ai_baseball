@@ -1,8 +1,6 @@
 class AppIcons {
   static const String _basePath = 'assets/icons';
 
-  AppIcons._();
-
   static String get arm => '$_basePath/arm_icon.svg';
   static String get back => '$_basePath/back_icon.svg';
   static String get bell => '$_basePath/bell_icon.svg';

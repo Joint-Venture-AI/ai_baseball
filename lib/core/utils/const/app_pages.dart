@@ -3,6 +3,8 @@ import 'package:baseball_ai/views/features/boarding/bindings/boarding_binding.da
 import 'package:baseball_ai/views/features/boarding/screens/boarding_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/bottom_nav/binding/main_parent_binding.dart';
 import 'package:baseball_ai/views/features/main_parent/bottom_nav/main_parent_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/profile/screens/profile_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/progress/binding/progress_binding.dart';
 import 'package:get/get.dart';
 
 class AppPages {
@@ -16,6 +18,12 @@ class AppPages {
       name: AppRoute.main,
       page: () => MainParentScreen(),
       binding: MainParentBinding(),
+    ),
+
+    GetPage(
+      name: AppRoute.progress,
+      page: () => ProfileScreen(),
+      binding: ProgressBinding(),
     ),
   ];
 }

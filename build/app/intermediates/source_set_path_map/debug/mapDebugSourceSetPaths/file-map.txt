@@ -18,10 +18,10 @@ com.example.baseball_ai.app-jetified-lifecycle-process-2.7.0-16 C:\Users\Shakib\
 com.example.baseball_ai.app-jetified-lifecycle-livedata-core-ktx-2.7.0-17 C:\Users\Shakib\.gradle\caches\8.10.2\transforms\ebeb29d7113d60e59d5e0acf92f847f3\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\res
 com.example.baseball_ai.app-jetified-annotation-experimental-1.4.0-18 C:\Users\Shakib\.gradle\caches\8.10.2\transforms\f09a22cdd213028a38958888c7d16e20\transformed\jetified-annotation-experimental-1.4.0\res
 com.example.baseball_ai.app-core-runtime-2.2.0-19 C:\Users\Shakib\.gradle\caches\8.10.2\transforms\ff849810dfe34a0ab790c402787c149e\transformed\core-runtime-2.2.0\res
-com.example.baseball_ai.app-debug-20 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\android\app\src\debug\res
-com.example.baseball_ai.app-main-21 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\android\app\src\main\res
-com.example.baseball_ai.app-pngs-22 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\build\app\generated\res\pngs\debug
-com.example.baseball_ai.app-resValues-23 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\build\app\generated\res\resValues\debug
-com.example.baseball_ai.app-packageDebugResources-24 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.example.baseball_ai.app-packageDebugResources-25 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.example.baseball_ai.app-debug-26 C:\Users\Shakib\Projects\office\baseball_ai\baseball_ai\build\app\intermediates\merged_res\debug\mergeDebugResources
+com.example.baseball_ai.app-debug-20 C:\Users\Shakib\Projects\office\baseball\android\app\src\debug\res
+com.example.baseball_ai.app-main-21 C:\Users\Shakib\Projects\office\baseball\android\app\src\main\res
+com.example.baseball_ai.app-pngs-22 C:\Users\Shakib\Projects\office\baseball\build\app\generated\res\pngs\debug
+com.example.baseball_ai.app-resValues-23 C:\Users\Shakib\Projects\office\baseball\build\app\generated\res\resValues\debug
+com.example.baseball_ai.app-packageDebugResources-24 C:\Users\Shakib\Projects\office\baseball\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.baseball_ai.app-packageDebugResources-25 C:\Users\Shakib\Projects\office\baseball\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.baseball_ai.app-debug-26 C:\Users\Shakib\Projects\office\baseball\build\app\intermediates\merged_res\debug\mergeDebugResources

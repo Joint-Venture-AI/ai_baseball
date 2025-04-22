@@ -23,8 +23,17 @@ class MyThemeData {
         ),
       ),
     ),
+    textTheme: TextTheme(
+      bodyMedium: TextStyle(
+        color: Colors.white, // <- text color while typing
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(color: AppStyles.hintTextColor),
+
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.r),
         borderSide: BorderSide(width: 1, color: Colors.white),

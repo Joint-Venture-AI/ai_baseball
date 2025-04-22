@@ -53,7 +53,6 @@ class ProgressScreen extends StatelessWidget {
                 ],
               );
             }),
-
             Text(
               'Was your workload in a controlled environment(bullpen/batting practice) or in-game?',
               style: AppStyles.bodySmall.copyWith(fontSize: 14.sp),

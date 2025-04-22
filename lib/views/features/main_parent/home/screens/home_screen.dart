@@ -1,10 +1,14 @@
 import 'package:baseball_ai/core/models/chart_data.dart';
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
+import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/screens/visualization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/get_navigation.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart'; // Add this dependency
 
@@ -210,7 +214,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                // Handle Get Started tap
+                Get.toNamed(AppRoute.visualation);
               },
               child: const Text(
                 'Get Started',
@@ -331,6 +335,7 @@ class HomeScreen extends StatelessWidget {
               ),
               onPressed: () {
                 // Handle Let's Go tap
+                Get.toNamed(AppRoute.dailyShort);
               },
               child: const Text(
                 "Let's Go",
@@ -352,25 +357,35 @@ class HomeScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: _buildAccessButton('Throwing\nJournal', AppIcons.throwIcon),
+          child: buildAccessButton(
+            'Throwing\nJournal',
+            AppIcons.throwIcon,
+            () => Get.toNamed(AppRoute.homethrowing),
+          ),
         ), // Example Icon
         const SizedBox(width: 12),
         Expanded(
-          child: _buildAccessButton('Arm Care', AppIcons.arm),
+          child: buildAccessButton(
+            'Arm Care',
+            AppIcons.arm,
+            () => Get.toNamed(AppRoute.armCare),
+          ),
         ), // Example Icon
         const SizedBox(width: 12),
         Expanded(
-          child: _buildAccessButton('Lifting Log', AppIcons.lifting),
+          child: buildAccessButton(
+            'Lifting Log',
+            AppIcons.lifting,
+            () => Get.toNamed(AppRoute.lifting),
+          ),
         ), // Example Icon
       ],
     );
   }
 
-  Widget _buildAccessButton(String label, String icon) {
+  Widget buildAccessButton(String label, String icon, VoidCallback onTap) {
     return InkWell(
-      onTap: () {
-        // Handle button tap
-      },
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12.0),
       child: Container(
         height: 104.h,

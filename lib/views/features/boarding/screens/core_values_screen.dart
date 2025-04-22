@@ -43,6 +43,7 @@ class CoreValuesScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: MyTextButton(
+                  isOutline: false,
                   buttonText: 'Add',
                   onTap: () => Get.to(DashboardPersonalizedScreen()),
                 ),

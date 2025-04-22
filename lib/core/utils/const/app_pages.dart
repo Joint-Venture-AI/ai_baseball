@@ -1,10 +1,21 @@
 import 'package:baseball_ai/core/utils/const/app_route.dart';
+import 'package:baseball_ai/views/features/auth/binding/auth_binding.dart';
+import 'package:baseball_ai/views/features/auth/screens/auth_screen.dart';
+import 'package:baseball_ai/views/features/auth/screens/login_screen.dart';
 import 'package:baseball_ai/views/features/boarding/bindings/boarding_binding.dart';
 import 'package:baseball_ai/views/features/boarding/screens/boarding_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/bottom_nav/binding/main_parent_binding.dart';
 import 'package:baseball_ai/views/features/main_parent/bottom_nav/main_parent_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/arm_care/arm_care_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/bindings/home_sub_binding.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_short/screens/daily_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_short/screens/home_throwing_journal_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/lifting/lifting_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/performance/performance_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/profile_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/progress/binding/progress_binding.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/binding/visualization_binding.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/screens/visualization_screen.dart';
 import 'package:get/get.dart';
 
 class AppPages {
@@ -24,6 +35,53 @@ class AppPages {
       name: AppRoute.progress,
       page: () => ProfileScreen(),
       binding: ProgressBinding(),
+    ),
+    GetPage(
+      name: AppRoute.visualation,
+      page: () => VisualizationScreen(),
+      binding: VisualizationBinding(),
+    ),
+
+    GetPage(
+      name: AppRoute.dailyShort,
+      page: () => DailyShortScreen(),
+      binding: HomeSubBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoute.auth,
+      page: () => AuthScreen(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoute.signIn,
+      page: () => LoginScreen(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoute.homethrowing,
+      page: () => HomeThrowingJournalScreen(),
+      binding: HomeSubBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoute.armCare,
+      page: () => ArmCareScreen(),
+      binding: HomeSubBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoute.lifting,
+      page: () => LiftingScreen(),
+      binding: HomeSubBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoute.performance,
+      page: () => PerformanceScreen(),
+      binding: HomeSubBinding(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }

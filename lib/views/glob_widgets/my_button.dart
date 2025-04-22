@@ -7,10 +7,12 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 class MyTextButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback onTap;
+  final bool isOutline;
   const MyTextButton({
     super.key,
     required this.buttonText,
     required this.onTap,
+    required this.isOutline,
   });
 
   @override
@@ -21,15 +23,21 @@ class MyTextButton extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: AppStyles.primaryColor,
+            color: isOutline! ? Colors.transparent : AppStyles.primaryColor,
             borderRadius: BorderRadius.circular(30.r),
+            border: Border.all(
+              width: 1,
+              color: isOutline! ? AppStyles.primaryColor : Colors.transparent,
+            ),
           ),
           child: Padding(
             padding: EdgeInsets.all(12.r),
             child: Center(
               child: Text(
                 buttonText,
-                style: AppStyles.bodyMedium.copyWith(color: Colors.black),
+                style: AppStyles.bodyMedium.copyWith(
+                  color: isOutline ? Colors.white : Colors.black,
+                ),
               ),
             ),
           ),

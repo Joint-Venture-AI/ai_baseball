@@ -182,6 +182,7 @@ com.example.baseball_ai:attr/animationBackgroundColor = 0x7f030004
 com.example.baseball_ai:drawable/notification_bg_low_normal = 0x7f06000a
 com.example.baseball_ai:attr/ttcIndex = 0x7f030025
 com.example.baseball_ai:attr/splitMaxAspectRatioInPortrait = 0x7f03001e
+com.example.baseball_ai:xml/flutter_image_picker_file_paths = 0x7f0e0000
 com.example.baseball_ai:styleable/FragmentContainerView = 0x7f0d0007
 com.example.baseball_ai:string/status_bar_notification_info_overflow = 0x7f0b0008
 com.example.baseball_ai:attr/fontWeight = 0x7f030013

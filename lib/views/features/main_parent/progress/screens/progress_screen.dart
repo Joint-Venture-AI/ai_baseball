@@ -31,16 +31,26 @@ class ProgressScreen extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Obx(() {
-              return Slider(
-                max: 100,
-                min: 0,
+              return Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      max: 10,
+                      min: 0,
 
-                value: progressController.todayScale.value.toDouble(),
-                activeColor: AppStyles.primaryColor,
-                inactiveColor: AppStyles.hintTextColor,
-                onChanged: (v) {
-                  progressController.todayScale.value = v.toInt();
-                },
+                      value: progressController.todayScale.value.toDouble(),
+                      activeColor: AppStyles.primaryColor,
+                      inactiveColor: AppStyles.hintTextColor,
+                      onChanged: (v) {
+                        progressController.todayScale.value = v.toInt();
+                      },
+                    ),
+                  ),
+                  Text(
+                    progressController.todayScale.value.toString(),
+                    style: AppStyles.bodySmall,
+                  ),
+                ],
               );
             }),
 
@@ -83,7 +93,11 @@ class ProgressScreen extends StatelessWidget {
             Spacer(),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-              child: MyTextButton(buttonText: 'Submit', onTap: () {}),
+              child: MyTextButton(
+                isOutline: false,
+                buttonText: 'Submit',
+                onTap: () {},
+              ),
             ),
           ],
         ),

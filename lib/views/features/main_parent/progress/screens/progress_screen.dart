@@ -37,7 +37,6 @@ class ProgressScreen extends StatelessWidget {
                     child: Slider(
                       max: 10,
                       min: 0,
-
                       value: progressController.todayScale.value.toDouble(),
                       activeColor: AppStyles.primaryColor,
                       inactiveColor: AppStyles.hintTextColor,
@@ -68,6 +67,7 @@ class ProgressScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
+                    style: AppStyles.bodySmall,
                     decoration: InputDecoration(
                       hintText: 'Describe how you\'re feeling today...',
                     ),
@@ -78,8 +78,8 @@ class ProgressScreen extends StatelessWidget {
                     style: AppStyles.bodySmall.copyWith(fontSize: 14.sp),
                   ),
                   SizedBox(height: 8.h),
-
                   TextFormField(
+                    style: AppStyles.bodySmall,
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: 'Describe how you\'re feeling today...',

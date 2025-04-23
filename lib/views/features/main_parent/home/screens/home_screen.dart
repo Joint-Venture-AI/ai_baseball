@@ -444,9 +444,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    // Handle Details tap
-                  },
+                  onTap: () => Get.to(PerformanceScreen()),
                   child: const Text(
                     'Details',
                     style: TextStyle(

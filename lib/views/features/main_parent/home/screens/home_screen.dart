@@ -3,6 +3,7 @@ import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
 import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/performance/performance_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/screens/visualization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -420,70 +421,73 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildLast7DaysOverview() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: cardBackground,
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Last 7 Days Overview",
-                style: TextStyle(
-                  color: textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                  // Handle Details tap
-                },
-                child: const Text(
-                  'Details',
+    return InkWell(
+      onTap: () => Get.to(PerformanceScreen()),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: cardBackground,
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Last 7 Days Overview",
                   style: TextStyle(
-                    color: primaryYellow,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    color: textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment
-                    .spaceBetween, // Distributes space between items
-            children: [
-              Expanded(
-                child: _buildChartPreview(
-                  'Hydration',
-                  chartData1, // <-- Provide the data for the first chart
+                InkWell(
+                  onTap: () {
+                    // Handle Details tap
+                  },
+                  child: const Text(
+                    'Details',
+                    style: TextStyle(
+                      color: primaryYellow,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12), // Spacing
-              Expanded(
-                child: _buildChartPreview(
-                  'Soreness',
-                  chartData2, // <-- Provide the data for the second chart
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment:
+                  MainAxisAlignment
+                      .spaceBetween, // Distributes space between items
+              children: [
+                Expanded(
+                  child: _buildChartPreview(
+                    'Hydration',
+                    chartData1, // <-- Provide the data for the first chart
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12), // Spacing
-              Expanded(
-                child: _buildChartPreview(
-                  'Bullpen Volume',
-                  chartData3, // <-- Provide the data for the third chart
+                const SizedBox(width: 12), // Spacing
+                Expanded(
+                  child: _buildChartPreview(
+                    'Soreness',
+                    chartData2, // <-- Provide the data for the second chart
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 12), // Spacing
+                Expanded(
+                  child: _buildChartPreview(
+                    'Bullpen Volume',
+                    chartData3, // <-- Provide the data for the third chart
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -12,6 +12,8 @@ import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_sh
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_short/screens/home_throwing_journal_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/lifting/lifting_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/performance/performance_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/nutrution/bindings/nutrution_binding.dart';
+import 'package:baseball_ai/views/features/main_parent/nutrution/screens/nutrition_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/profile_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/progress/binding/progress_binding.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/binding/visualization_binding.dart';
@@ -81,6 +83,13 @@ class AppPages {
       name: AppRoute.performance,
       page: () => PerformanceScreen(),
       binding: HomeSubBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoute.nutrution,
+      page: () => NutritionScreen(),
+      binding: NutrutionBinding(),
       transition: Transition.rightToLeft,
     ),
   ];

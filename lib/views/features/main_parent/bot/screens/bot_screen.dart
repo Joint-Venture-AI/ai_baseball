@@ -1,4 +1,8 @@
+import 'package:baseball_ai/core/utils/const/app_icons.dart';
+import 'package:baseball_ai/core/utils/theme/app_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});
@@ -123,65 +127,50 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             ),
           ),
           // Input field area at the bottom
-          _buildMessageInput(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageInput() {
-    return Container(
-      // Use Container for padding and potential background/border styling
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      color:
-          darkBackground, // Match scaffold background or specific color if needed
-      child: Container(
-        decoration: BoxDecoration(
-          color: inputBackground,
-          borderRadius: BorderRadius.circular(25.0), // Rounded corners
-        ),
-        child: TextField(
-          controller: _controller,
-          style: const TextStyle(
-            color: textPrimary,
-            fontSize: 16,
-          ), // Input text color
-          cursorColor: primaryYellow, // Cursor color
-          decoration: InputDecoration(
-            hintText: 'Message with coach PJ...',
-            hintStyle: TextStyle(
-              color: hintColor,
-              fontSize: 16,
-            ), // Hint text color
-            border: InputBorder.none, // Remove default border
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 14.0,
-            ), // Padding inside the input field
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.send, color: textPrimary),
-              onPressed: () {
-                // Handle message sending logic
-                String message = _controller.text;
-                if (message.isNotEmpty) {
-                  print('Sending message: $message');
-                  // Add your logic to send the message
-                  _controller.clear(); // Clear the input field after sending
-                  FocusScope.of(context).unfocus(); // Hide keyboard
-                }
-              },
+          Container(
+            decoration: BoxDecoration(
+              color: AppStyles.cardColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.0.r),
+                topRight: Radius.circular(20.r),
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 25..h),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade700,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: TextField(
+                  scrollPadding: EdgeInsets.symmetric(horizontal: 10.w),
+                  style: AppStyles.bodySmall.copyWith(color: Colors.white),
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 10.h,
+                    ),
+                    hintText: 'Message with coach Pj...',
+                    hintStyle: AppStyles.bodySmall.copyWith(
+                      color: Colors.white,
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () {},
+                      icon: SvgPicture.asset(
+                        AppIcons.send,
+                        color: Colors.white,
+                      ),
+                    ),
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                  ),
+                ),
+              ),
             ),
           ),
-          onSubmitted: (message) {
-            // Handle message sending logic when user presses 'send' on keyboard
-            if (message.isNotEmpty) {
-              print('Sending message (submitted): $message');
-              // Add your logic to send the message
-              _controller.clear(); // Clear the input field after sending
-              FocusScope.of(context).unfocus(); // Hide keyboard
-            }
-          },
-        ),
+        ],
       ),
     );
   }

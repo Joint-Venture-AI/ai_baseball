@@ -360,6 +360,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  radial_chart_package:
+    dependency: "direct main"
+    description:
+      name: radial_chart_package
+      sha256: "556b94c4831ebdd46df0782c72706533c213b966ff7f4e7cb03eb4a5b9ef548b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   sky_engine:
     dependency: transitive
     description: flutter

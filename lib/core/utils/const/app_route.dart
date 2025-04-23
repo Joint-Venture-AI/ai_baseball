@@ -12,4 +12,5 @@ class AppRoute {
   static String armCare = '/armCare';
   static String lifting = '/lifting';
   static String performance = '/performance';
+  static String nutrution = '/nutrution';
 }

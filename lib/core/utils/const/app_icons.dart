@@ -27,4 +27,6 @@ class AppIcons {
   static String get throwIcon => '$_basePath/throw_icon.svg';
   static String get timerOutline => '$_basePath/timer_outline.svg';
   static String get timer => '$_basePath/timer_icon.svg';
+
+  static String get passIcon => '$_basePath/pass_icon.svg';
 }

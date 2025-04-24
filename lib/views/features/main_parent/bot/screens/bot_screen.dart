@@ -1,8 +1,11 @@
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});
@@ -71,6 +74,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                 ),
                 onPressed: () {
                   // Handle notification tap
+                  Get.to(NotificationScreen());
                 },
                 tooltip: 'Notifications', // Add tooltip for accessibility
                 padding: EdgeInsets.zero, // Remove default padding

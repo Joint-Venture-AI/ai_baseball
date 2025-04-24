@@ -1,3 +1,4 @@
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/controller/visualization_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // If using screenutil
@@ -55,6 +56,7 @@ class VisualizationScreen extends StatelessWidget {
               size: 24.sp,
             ),
             onPressed: () {
+              Get.to(NotificationScreen());
               /* Handle notification tap */
             },
           ),

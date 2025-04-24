@@ -1,6 +1,9 @@
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Required for input formatters
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 // Assuming AppStyles exists in your project like this:
 class AppStyles {
@@ -116,6 +119,7 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
             ),
             onPressed: () {
               // Handle notification tap
+              Get.to(NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding

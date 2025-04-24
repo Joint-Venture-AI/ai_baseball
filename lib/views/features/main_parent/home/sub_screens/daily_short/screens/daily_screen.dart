@@ -1,6 +1,9 @@
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart'; // For formatting time
 
 // Assuming AppStyles exists in your project like this:
@@ -151,6 +154,7 @@ class _DailyShortScreenState extends State<DailyShortScreen> {
             ),
             onPressed: () {
               // Handle notification tap
+              Get.to(NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding

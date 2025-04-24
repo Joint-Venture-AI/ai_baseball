@@ -3,6 +3,8 @@ import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
 import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/hiting_journal/hiting_journal_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/performance/performance_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/screens/visualization_screen.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +35,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: darkBackground,
       appBar: AppBar(
-        backgroundColor: AppStyles.cardColor,
+        backgroundColor: cardBackground,
         elevation: 0,
         leadingWidth: 80, // Increased width to accommodate padding + avatar
         leading: Padding(
@@ -66,11 +68,12 @@ class HomeScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
-              backgroundColor: AppStyles.cardColor,
+              backgroundColor: cardBackground,
               child: IconButton(
                 icon: SvgPicture.asset(AppIcons.bell, color: Colors.white),
                 onPressed: () {
                   // Handle notification tap
+                  Get.to(NotificationScreen());
                 },
               ),
             ),
@@ -354,33 +357,74 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildQuickAccessButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: buildAccessButton(
-            'Throwing\nJournal',
-            AppIcons.throwIcon,
-            () => Get.toNamed(AppRoute.homethrowing),
+    // Define a width for each button. Adjust this value as needed.
+    // A fixed pixel width is common for scrollable lists.
+    final double buttonWidth = 108.0.w; // Example width
+    final double buttonHeight = 108.0.h; // Example width
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        // mainAxisAlignment won't have much effect if the total width
+        // of children exceeds the screen width, as the Row will be wider.
+        // If the total width is less than screen width, it will work.
+        // Keep it if you want spacing when the list isn't full screen.
+        mainAxisAlignment:
+            MainAxisAlignment.start, // or MainAxisAlignment.spaceBetween
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items nicely
+        children: [
+          // Removed Expanded, wrapped in SizedBox to give a fixed width
+          SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+            child: buildAccessButton(
+              'Throwing\nJournal',
+              AppIcons.throwIcon,
+              () => Get.toNamed(AppRoute.homethrowing),
+            ),
           ),
-        ), // Example Icon
-        const SizedBox(width: 12),
-        Expanded(
-          child: buildAccessButton(
-            'Arm Care',
-            AppIcons.arm,
-            () => Get.toNamed(AppRoute.armCare),
+          const SizedBox(width: 12), // Spacer between buttons
+          // Removed Expanded, wrapped in SizedBox
+          SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+
+            child: buildAccessButton(
+              'Arm Care',
+              AppIcons.arm,
+              () => Get.toNamed(AppRoute.armCare),
+            ),
           ),
-        ), // Example Icon
-        const SizedBox(width: 12),
-        Expanded(
-          child: buildAccessButton(
-            'Lifting Log',
-            AppIcons.lifting,
-            () => Get.toNamed(AppRoute.lifting),
+          const SizedBox(width: 12), // Spacer
+          // Removed Expanded, wrapped in SizedBox
+          SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+
+            child: buildAccessButton(
+              'Lifting Log',
+              AppIcons.lifting,
+              () => Get.toNamed(AppRoute.lifting),
+            ),
           ),
-        ), // Example Icon
-      ],
+          const SizedBox(width: 12), // Spacer
+          // Removed Expanded, wrapped in SizedBox
+          SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+
+            child: buildAccessButton(
+              'Hitting Journal',
+              AppIcons
+                  .hitingJournal, // Using AppIcons.lifting for Hitting Journal? Check this icon.
+              () => Get.toNamed(AppRoute.hitingJournal),
+            ),
+          ),
+          // Add more buttons and spacers as needed
+          // const SizedBox(width: 12),
+          // SizedBox(...),
+        ],
+      ),
     );
   }
 

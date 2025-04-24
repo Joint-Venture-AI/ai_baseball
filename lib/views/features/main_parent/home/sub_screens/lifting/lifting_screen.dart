@@ -1,5 +1,8 @@
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 // Assuming AppStyles exists in your project like this:
 class AppStyles {
@@ -79,7 +82,7 @@ class _LiftingScreenState extends State<LiftingScreen> {
     'Isometric (holding position)': false,
     'Concentric (lifting phase emphasis)': false,
   };
-
+  bool showLogWidget = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,6 +111,7 @@ class _LiftingScreenState extends State<LiftingScreen> {
             ),
             onPressed: () {
               // Handle notification tap
+              Get.to(NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding
@@ -143,26 +147,33 @@ class _LiftingScreenState extends State<LiftingScreen> {
             SizedBox(height: 30.h),
 
             // --- Log Exercises Button ---
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppStyles.cardColor, // Darker background
-                foregroundColor: AppStyles.primaryColor, // Yellow text
-                minimumSize: Size(double.infinity, 50.h), // Full width
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.r), // Rounded corners
+            // --- Log Exercises Button ---
+            showLogWidget
+                ? _buildLogWidget()
+                : ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppStyles.cardColor, // Darker background
+                    foregroundColor: AppStyles.primaryColor, // Yellow text
+                    minimumSize: Size(double.infinity, 50.h), // Full width
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        25.r,
+                      ), // Rounded corners
+                    ),
+                    elevation: 0, // No shadow
+                  ),
+                  onPressed: () {
+                    // Handle Log Exercises tap
+                    setState(() {
+                      showLogWidget = !showLogWidget;
+                    });
+                    print("Log Exercises Tapped");
+                  },
+                  child: const Text(
+                    'Log Exercises for Future Ref.',
+                    style: AppStyles.secondaryButtonTextStyle,
+                  ),
                 ),
-                elevation: 0, // No shadow
-              ),
-              onPressed: () {
-                // Handle Log Exercises tap
-                print("Log Exercises and Set/Reps Tapped");
-              },
-              child: const Text(
-                'Log Exercises and Set/Reps',
-                style: AppStyles.secondaryButtonTextStyle,
-              ),
-            ),
-
             SizedBox(
               height: 20.h,
             ), // Space before the final submit button if needed
@@ -297,6 +308,34 @@ class _LiftingScreenState extends State<LiftingScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLogWidget() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Text('Log your exercise: ', style: AppStyles.bodyText),
+            const Spacer(),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  showLogWidget = !showLogWidget;
+                });
+              },
+              icon: Icon(Icons.cancel, color: Colors.red),
+            ),
+          ],
+        ),
+        SizedBox(height: 8.h),
+        TextField(
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: 'List the exercise, and reps you performed today...',
+          ),
+        ),
+      ],
     );
   }
 }

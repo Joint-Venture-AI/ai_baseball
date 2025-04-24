@@ -13,4 +13,5 @@ class AppRoute {
   static String lifting = '/lifting';
   static String performance = '/performance';
   static String nutrution = '/nutrution';
+  static String hitingJournal = '/hitingJournal';
 }

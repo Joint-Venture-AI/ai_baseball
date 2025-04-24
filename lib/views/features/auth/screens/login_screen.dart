@@ -1,5 +1,6 @@
 import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/views/features/auth/screens/forget_pass_screen.dart';
 import 'package:baseball_ai/views/features/boarding/screens/welcome_screen.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:flutter/material.dart';
@@ -82,10 +83,13 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             Align(
               alignment: Alignment.centerRight,
-              child: Text(
-                'Forget Password', // Consider making this a TextButton for interaction
-                style: AppStyles.bodySmall.copyWith(
-                  color: AppStyles.primaryColor,
+              child: TextButton(
+                onPressed: () => Get.to(ForgetPassScreen()),
+                child: Text(
+                  'Forget Password', // Consider making this a TextButton for interaction
+                  style: AppStyles.bodySmall.copyWith(
+                    color: AppStyles.primaryColor,
+                  ),
                 ),
               ),
             ),

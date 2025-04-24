@@ -98,6 +98,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "flutter_otp_text_field",
+      "rootUri": "file:///C:/Users/Shakib/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_otp_text_field-1.5.1+1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "flutter_plugin_android_lifecycle",
       "rootUri": "file:///C:/Users/Shakib/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.28",
       "packageUri": "lib/",
@@ -392,7 +398,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-04-23T08:56:21.069499Z",
+  "generated": "2025-04-24T05:48:12.311863Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/flutter",

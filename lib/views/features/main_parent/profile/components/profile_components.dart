@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class ProfileComponents {
   static Future<void> showLogOutSheet(BuildContext context) {
     return showModalBottomSheet(
+      backgroundColor: AppStyles.primaryColor,
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
@@ -15,7 +16,7 @@ class ProfileComponents {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppStyles.secondaryColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           ),
           child: Column(
@@ -45,7 +46,7 @@ class ProfileComponents {
                 'Are you sure you want to logout?',
                 textAlign: TextAlign.center,
                 style: AppStyles.bodySmall.copyWith(
-                  color: Colors.black,
+                  color: Colors.white,
                   fontSize: 18.sp,
                 ),
               ),

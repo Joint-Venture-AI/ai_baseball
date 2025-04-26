@@ -1,10 +1,9 @@
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart'; // Assuming this path is correct
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get.dart'; // Assuming GetX is used
 
-// Assuming AppStyles exists in your project like this:
+// Assuming AppStyles exists in your project and contains the necessary definitions:
 class AppStyles {
   static const Color backgroundColor = Color(0xFF1A1A1A); // Dark background
   static const Color primaryColor = Colors.yellow; // Yellow accent
@@ -13,9 +12,10 @@ class AppStyles {
   static const Color cardColor = Color(
     0xFF2C2C2C,
   ); // Slightly lighter grey for inputs/buttons
-  static const Color checkboxActiveColor = primaryColor;
+  static const Color checkboxActiveColor =
+      primaryColor; // Not used in Hitting Journal UI
   static const Color checkboxInactiveColor =
-      Colors.grey; // Border color when unchecked
+      Colors.grey; // Not used in Hitting Journal UI
 
   static const TextStyle headingTitle = TextStyle(
     color: textColor,
@@ -50,49 +50,51 @@ class AppStyles {
     fontSize: 16,
     fontWeight: FontWeight.bold,
   );
+
+  // New style for text field input text
+  static const TextStyle inputTextStyle = TextStyle(
+    color: textColor,
+    fontSize: 15, // Match body text size
+  );
 }
 
-class HitingJournalScreen extends StatefulWidget {
-  const HitingJournalScreen({super.key});
+class HittingJournalScreen extends StatefulWidget {
+  const HittingJournalScreen({super.key});
 
   @override
-  State<HitingJournalScreen> createState() => _ArmCareScreenState();
+  State<HittingJournalScreen> createState() => _HittingJournalScreenState(); // Renamed State class
 }
 
-class _ArmCareScreenState extends State<HitingJournalScreen> {
-  // State maps for checkboxes
-  Map<String, bool> focusOptions = {
-    'Scapular Emphasis': false,
-    'Shoulder Emphasis': false,
-    'Forearms': false,
-    'Biceps/Triceps': false,
-  };
+class _HittingJournalScreenState extends State<HittingJournalScreen> {
+  // State for the slider
+  double _dialedInValue = 7.0; // Initial value based on the image
 
-  Map<String, bool> exerciseFocusOptions = {
-    'Isometric': false,
-    'Eccentric': false,
-    'Oscillating': false,
-  };
+  // Controllers for text fields
+  final TextEditingController _primaryFocusController = TextEditingController();
+  final TextEditingController _atBatsController = TextEditingController();
+  final TextEditingController _atBatsResultsController =
+      TextEditingController();
+  final TextEditingController _somethingPositiveController =
+      TextEditingController();
 
-  Map<String, bool> recoveryOptions = {
-    'Hot tub': false,
-    'Cold Tub': false,
-    'Stim': false,
-    'Ice pack': false,
-    'Grastens/scraping': false,
-    'Foam roll': false,
-    'Dry needling': false,
-    'Cupping': false,
-    'Gameready': false,
-    'Normatec': false,
-    'Marc Pro': false,
-    'BFR': false,
-  };
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is removed
+    _primaryFocusController.dispose();
+    _atBatsController.dispose();
+    _atBatsResultsController.dispose();
+    _somethingPositiveController.dispose();
+    super.dispose();
+  }
 
   bool showLogWidget = false;
 
   @override
   Widget build(BuildContext context) {
+    // Ensure ScreenUtil is initialized if used in other parts of your app
+    // If not, you might need to initialize it here or wrap your MaterialApp.
+    // ScreenUtil.init(context, designSize: Size(360, 690)); // Example initialization
+
     return Scaffold(
       backgroundColor: AppStyles.backgroundColor,
       appBar: AppBar(
@@ -114,12 +116,12 @@ class _ArmCareScreenState extends State<HitingJournalScreen> {
               child: const Icon(
                 Icons.notifications_none_outlined, // Or Icons.notifications
                 color: AppStyles.textColor,
-                size: 24, // Adjust size
+                size: 24,
               ),
             ),
             onPressed: () {
-              // Handle notification tap
-              Get.to(NotificationScreen());
+              // Handle notification tap - Ensure NotificationScreen exists
+              Get.to(() => NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding
@@ -130,35 +132,129 @@ class _ArmCareScreenState extends State<HitingJournalScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Introductory text (matches the image text)
             Text(
-              'Track your arm care routines and recovery modalities',
+              'Track your arm care routines and recovery modalities', // Text from the image
               style: AppStyles.bodyText.copyWith(color: AppStyles.hintColor),
             ),
             SizedBox(height: 25.h),
 
-            // --- Focus Section ---
-            _buildCheckboxSection(
-              title: "What was your focus for today's arm care?",
-              options: focusOptions,
+            // --- Question 1: How dialed in were you... (Slider) ---
+            Text(
+              '1. How dialed in were you during your pregame routine today? (Batting practice. tee work. drills. movement prep. etc)',
+              style: AppStyles.labelText,
             ),
-
-            // --- Exercise Focus Section ---
-            _buildCheckboxSection(
-              title:
-                  "Was there an isometric, oscillating, or eccentric focus to these exercises?",
-              options: exerciseFocusOptions,
-            ),
-
-            // --- Recovery Modalities Section ---
-            _buildCheckboxSection(
-              title: "What type of recovery modalities did you perform today?",
-              options: recoveryOptions,
-              showOthers: true, // Add the "Others" option here
-            ),
-
             SizedBox(height: 10.h),
+            Row(
+              children: [
+                // Slider
+                Expanded(
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 8.h, // Adjust track height
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 10.0,
+                      ), // Adjust thumb size
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 20.0,
+                      ), // Adjust overlay size
+                      activeTrackColor: AppStyles.primaryColor, // Yellow track
+                      inactiveTrackColor:
+                          AppStyles.cardColor, // Dark grey inactive track
+                      thumbColor: AppStyles.textColor, // White thumb
+                      overlayColor: AppStyles.primaryColor.withOpacity(
+                        0.2,
+                      ), // Yellow overlay
+                      valueIndicatorColor:
+                          AppStyles.primaryColor, // Value indicator color
+                      valueIndicatorTextStyle:
+                          AppStyles
+                              .buttonTextStyle, // Value indicator text style
+                    ),
+                    child: Slider(
+                      value: _dialedInValue,
+                      min: 1.0, // Assuming a scale of 1 to 10
+                      max: 10.0,
+                      divisions: 9, // 1 through 10
+                      label: _dialedInValue.round().toString(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          _dialedInValue = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w), // Space between slider and number
+                // Display the current value
+                Text(
+                  _dialedInValue.round().toString(),
+                  style: AppStyles.bodyText.copyWith(
+                    fontSize: 18.sp,
+                  ), // Larger text for number
+                ),
+              ],
+            ),
+            SizedBox(height: 25.h),
 
-            // --- Log Exercises Button ---
+            // --- Question 2: What was your primary focus... (Text Input) ---
+            Text(
+              '2. What was your primary focus going into today?',
+              style: AppStyles.labelText,
+            ),
+            SizedBox(height: 10.h),
+            _buildTextField(
+              controller: _primaryFocusController,
+              hintText: 'Describe today\'s focus...',
+              maxLines: 4, // Multiple lines
+            ),
+            SizedBox(height: 25.h),
+
+            // --- Question 3: How many at-bats... (Text Input) ---
+            Text(
+              '3. How many at-bats did you have today?',
+              style: AppStyles.labelText,
+            ),
+            SizedBox(height: 10.h),
+            _buildTextField(
+              controller: _atBatsController,
+              hintText: '....', // Hint text from image
+              maxLines: 1, // Single line
+              keyboardType: TextInputType.numberWithOptions(
+                decimal: false,
+              ), // Suggest numeric keyboard
+            ),
+            SizedBox(height: 25.h),
+
+            // --- Question 4: What were the results... (Text Input) ---
+            Text(
+              '4. What were the results of your at-bats?',
+              style: AppStyles.labelText,
+            ),
+            SizedBox(height: 10.h),
+            _buildTextField(
+              controller: _atBatsResultsController,
+              hintText: 'Enter today\'s results...', // Hint text from image
+              maxLines: 4, // Multiple lines
+            ),
+            SizedBox(height: 25.h),
+
+            // --- Question 5: What's something positive... (Text Input) ---
+            Text(
+              '5. What\'s something positive you can take away from today?',
+              style: AppStyles.labelText,
+            ),
+            SizedBox(height: 10.h),
+            _buildTextField(
+              controller: _somethingPositiveController,
+              hintText:
+                  'One positive thing about today...', // Hint text from image
+              maxLines: 4, // Multiple lines
+            ),
+            SizedBox(height: 25.h), // Space before the Log Exercises button
+            // --- Log Exercises Button (from image) ---
+            SizedBox(height: 20.h),
+
             showLogWidget
                 ? _buildLogWidget()
                 : ElevatedButton(
@@ -185,10 +281,9 @@ class _ArmCareScreenState extends State<HitingJournalScreen> {
                     style: AppStyles.secondaryButtonTextStyle,
                   ),
                 ),
-
             SizedBox(
               height: 20.h,
-            ), // Space before the final submit button if needed
+            ), // Space before the final submit button (adjust as needed)
           ],
         ),
       ),
@@ -210,10 +305,13 @@ class _ArmCareScreenState extends State<HitingJournalScreen> {
             ),
           ),
           onPressed: () {
-            // Handle submission
-            print('Focus Options: $focusOptions');
-            print('Exercise Focus: $exerciseFocusOptions');
-            print('Recovery Options: $recoveryOptions');
+            // Handle submission - Access data from state and controllers
+            print('Dialed In Value: ${_dialedInValue.round()}');
+            print('Primary Focus: ${_primaryFocusController.text}');
+            print('At Bats: ${_atBatsController.text}');
+            print('At Bats Results: ${_atBatsResultsController.text}');
+            print('Something Positive: ${_somethingPositiveController.text}');
+            // Add logic to save or process the data
           },
           child: const Text('Submit', style: AppStyles.buttonTextStyle),
         ),
@@ -221,126 +319,42 @@ class _ArmCareScreenState extends State<HitingJournalScreen> {
     );
   }
 
-  // --- Helper Widget for Checkbox Sections ---
-  Widget _buildCheckboxSection({
-    required String title,
-    required Map<String, bool> options,
-    bool showOthers = false,
+  // --- Helper Widget to build TextFields with consistent styling ---
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    int maxLines = 1, // Default to single line
+    TextInputType keyboardType = TextInputType.text,
   }) {
-    List<String> keys = options.keys.toList();
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: 25.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppStyles.labelText),
-          SizedBox(height: 15.h),
-          GridView.builder(
-            padding: EdgeInsets.zero, // Remove default GridView padding
-            shrinkWrap: true, // Important for GridView inside Column/ScrollView
-            physics:
-                const NeverScrollableScrollPhysics(), // Disable GridView scrolling
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Two columns
-              childAspectRatio:
-                  4 / 1, // Adjust aspect ratio (width/height) for item size
-              crossAxisSpacing: 10.w, // Horizontal spacing
-              mainAxisSpacing: 10.h, // Vertical spacing
-            ),
-            itemCount:
-                keys.length +
-                (showOthers ? 1 : 0), // Add 1 for "Others" if needed
-            itemBuilder: (context, index) {
-              if (showOthers && index == keys.length) {
-                // Build the "Others" item
-                return _buildOthersOption();
-              }
-              // Build regular checkbox item
-              String key = keys[index];
-              return _buildCheckboxTile(key, options);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- Helper Widget for a single Checkbox Tile ---
-  Widget _buildCheckboxTile(String key, Map<String, bool> optionsMap) {
-    return GestureDetector(
-      // Make text tappable
-      onTap: () {
-        setState(() {
-          optionsMap[key] = !(optionsMap[key] ?? false);
-        });
-      },
-      child: Row(
-        mainAxisSize:
-            MainAxisSize.min, // Prevent row from expanding unnecessarily
-        children: [
-          Checkbox(
-            value: optionsMap[key] ?? false,
-            onChanged: (bool? newValue) {
-              setState(() {
-                optionsMap[key] = newValue ?? false;
-              });
-            },
-            activeColor: AppStyles.checkboxActiveColor,
-            checkColor: Colors.black, // Color of the checkmark
-            side: MaterialStateBorderSide.resolveWith(
-              // Border style
-              (states) {
-                if (states.contains(MaterialState.selected)) {
-                  return const BorderSide(
-                    color: AppStyles.checkboxActiveColor,
-                    width: 2,
-                  );
-                }
-                return const BorderSide(
-                  color: AppStyles.checkboxInactiveColor,
-                  width: 2,
-                );
-              },
-            ),
-            visualDensity: const VisualDensity(
-              horizontal: -4,
-              vertical: -4,
-            ), // Compact size
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ), // Slightly rounded square
-          ),
-          // SizedBox(width: 4.w), // Optional small space
-          Flexible(
-            // Allow text to wrap if needed, though unlikely with aspect ratio
-            child: Text(
-              key,
-              style: AppStyles.bodyText,
-              overflow: TextOverflow.ellipsis, // Prevent overflow issues
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- Helper Widget for the "Others" option ---
-  Widget _buildOthersOption() {
-    return GestureDetector(
-      onTap: () {
-        // Handle "Others" tap - e.g., show a dialog or navigate
-        print("Others Tapped");
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Add padding to align with checkbox visually
-          SizedBox(width: 12.w),
-          Icon(Icons.add, color: AppStyles.textColor, size: 20.sp),
-          SizedBox(width: 8.w),
-          Text('Others', style: AppStyles.bodyText),
-        ],
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      style: AppStyles.inputTextStyle, // Use the new input text style
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: AppStyles.hintStyle,
+        filled: true,
+        fillColor: AppStyles.cardColor, // Dark grey background
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r), // Rounded corners
+          borderSide: BorderSide.none, // No visible border line
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(
+            color: AppStyles.primaryColor,
+            width: 1.5,
+          ), // Highlight with yellow border when focused
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 15.w,
+          vertical: 12.h,
+        ), // Adjust padding inside
       ),
     );
   }

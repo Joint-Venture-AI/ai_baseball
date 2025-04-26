@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 8.h),
                   TextFormField(
                     decoration: InputDecoration(
-                      hintText: 'Enter your Email...',
+                      hintText: 'Enter your email...',
                       // You might want to add specific styling for your inputs here
                       // matching your AppStyles if needed.
                     ),

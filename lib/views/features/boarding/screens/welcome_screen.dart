@@ -20,6 +20,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _isPasswordVisible = false;
   String? _selectedPlayerType; // To hold the selected player type
   String? _selectedJournalFrequency; // To hold the selected journal frequency
+  String? _selectedLevelOfSport; // To hold the selected level of sport
+
+  // List of options for the Level of Sport dropdown
+  final List<String> _levelOfSportOptions = [
+    'school',
+    'college',
+    'professional',
+    'other',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +70,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Text('Name', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h), // Consistent spacing
                       TextFormField(
+                        style: AppStyles.bodySmall,
                         decoration: InputDecoration(
                           hintText: 'Enter your name...',
                         ),
@@ -72,9 +82,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Text('Email', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h),
                       TextFormField(
+                        style: AppStyles.bodySmall,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          hintText: 'Enter your Email...',
+                          hintText: 'Enter your email...',
                         ),
                       ),
                       SizedBox(height: 18.h),
@@ -83,6 +94,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Text('Password', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h),
                       TextFormField(
+                        style: AppStyles.bodySmall,
                         obscureText: !_isPasswordVisible, // Toggle visibility
                         decoration: InputDecoration(
                           hintText: 'Enter your password...',
@@ -102,25 +114,80 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ),
                       SizedBox(height: 18.h),
-
-                      // --- Level of Sport ---
                       Text('Level of Sport', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h),
-                      // Using TextFormField with suffix icon to mimic dropdown look
-                      TextFormField(
-                        readOnly:
-                            true, // Make it non-editable if it's just a trigger for a dropdown/picker
-                        decoration: InputDecoration(
-                          hintText: 'school, college etc...',
-                          suffixIcon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: AppStyles.subtitleColor,
-                            size: 28.sp,
-                          ),
+
+                      DropdownButtonFormField<String>(
+                        value: _selectedLevelOfSport, // Bind to state variable
+                        style: AppStyles.bodySmall.copyWith(
+                          color: Colors.white,
                         ),
-                        onTap: () {
-                          // Implement dropdown logic here if needed (e.g., showModalBottomSheet)
-                          print("Level of Sport tapped");
+                        decoration: InputDecoration(
+                          hintText: 'school, college etc...', // Hint text
+                          // Style for the hint text (can make it slightly less opaque like in the image)
+                          hintStyle: TextStyle(color: Colors.white),
+                          labelStyle: AppStyles.bodySmall.copyWith(
+                            color:
+                                Colors
+                                    .white, // Styles a potential labelText, not the label above
+                          ),
+                          // --- ADDED: Border Styling to match the image ---
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.white54,
+                              width: 1.0,
+                            ), // Light grey border
+                            borderRadius: BorderRadius.circular(
+                              8.0,
+                            ), // Rounded corners
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.white,
+                              width: 1.0,
+                            ), // White border when focused
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 12.0,
+                          ), // Adjust padding if needed
+                        ),
+                        icon: Icon(
+                          // Custom dropdown icon
+                          Icons.keyboard_arrow_down_rounded,
+                          color:
+                              AppStyles
+                                  .subtitleColor, // Use your subtitle color
+
+                          size: 28.0, // Assuming 28.sp resolves to roughly 28.0
+                        ),
+                        isExpanded:
+                            true, // Make the dropdown take the full width
+                        dropdownColor:
+                            AppStyles
+                                .backgroundColor, // Set dropdown menu background
+                        items:
+                            _levelOfSportOptions.map((String level) {
+                              return DropdownMenuItem<String>(
+                                value: level,
+                                child: Text(
+                                  level.capitalizeFirst!,
+                                  style: AppStyles.bodySmall.copyWith(
+                                    color:
+                                        Colors
+                                            .white, // Set text color explicitly for the dropdown items
+                                  ),
+                                  overflow:
+                                      TextOverflow.ellipsis, // Prevent overflow
+                                ),
+                              );
+                            }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedLevelOfSport = newValue;
+                          });
                         },
                       ),
                       SizedBox(height: 18.h),
@@ -226,7 +293,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               SizedBox(height: 8.h),
                               Text(
                                 // Ensure text matches image - use exact text if possible
-                                '"Prism Sports Joumal is designed to empower athletes to log their daily habits and workloads, ensuring they can track their progress and reflect on their performance throughout a long, challenging season. Meanwhile, Coach PJ, your AI coach, continuously monitors and logs this information on the backend to provide guidance, keep you consistent, and offer support when you\'re feeling lost"',
+                                'Prism Sports Joumal is designed to empower athletes to log their daily habits and workloads, ensuring they can track their progress and reflect on their performance throughout a long, challenging season. Meanwhile, Coach PJ, your AI coach, continuously monitors and logs this information on the backend to provide guidance, keep you consistent, and offer support when you\'re feeling lost',
                                 style: AppStyles.bodySmall.copyWith(
                                   color: AppStyles.subtitleColor,
                                   height:
@@ -244,7 +311,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         buttonText: 'Next',
                         onTap: () {
                           // Add form validation here if needed before navigating
-                          print("Next button tapped");
+                          // Access selected values like:
+                          // print('Name: ${nameController.text}'); // (if using controllers)
+                          // print('Email: ${emailController.text}'); // (if using controllers)
+                          // print('Password: ${passwordController.text}'); // (if using controllers)
+                          print('Level of Sport: $_selectedLevelOfSport');
+                          print('Player Type: $_selectedPlayerType');
+                          print(
+                            'Journal Frequency: $_selectedJournalFrequency',
+                          );
+
                           Get.to(
                             () => const CoreValuesScreen(),
                           ); // Ensure CoreValuesScreen is imported

@@ -20,25 +20,25 @@ class AppStyles {
 
   static final TextStyle bodyMedium = TextStyle(
     color: textPrimaryColor,
-    fontSize: 16.sp, // Adjusted for potential screen util scaling
+    fontSize: 16, // Adjusted for potential screen util scaling
     fontWeight: FontWeight.w600, // Semibold often looks good for titles
   );
 
   static final TextStyle bodySmall = TextStyle(
     color: textPrimaryColor, // Default to white
-    fontSize: 14.sp, // Adjusted for potential screen util scaling
+    fontSize: 14, // Adjusted for potential screen util scaling
     fontWeight: FontWeight.normal,
   );
 
   static final TextStyle headingLarge = TextStyle(
     color: textPrimaryColor,
-    fontSize: 28.sp, // Larger heading
+    fontSize: 28, // Larger heading
     fontWeight: FontWeight.bold,
   );
 
   static final TextStyle buttonTextStyle = TextStyle(
     color: Colors.black, // Text color on yellow button
-    fontSize: 16.sp,
+    fontSize: 16,
     fontWeight: FontWeight.bold,
   );
 }

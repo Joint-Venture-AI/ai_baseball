@@ -95,7 +95,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoute.hitingJournal,
-      page: () => HitingJournalScreen(),
+      page: () => HittingJournalScreen(),
       binding: HomeSubBinding(),
       transition: Transition.rightToLeft,
     ),

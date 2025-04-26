@@ -68,7 +68,7 @@ class _EditProfileState extends State<EditProfile> {
 
               controller: fullNameController,
               decoration: InputDecoration(
-                hintText: 'Enter your Full Name...',
+                hintText: 'Enter your first name...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: AppStyles.hintColor),
@@ -86,7 +86,7 @@ class _EditProfileState extends State<EditProfile> {
 
               controller: nicknameController,
               decoration: InputDecoration(
-                hintText: 'Enter your Nickname...',
+                hintText: 'Enter your last name...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: AppStyles.hintColor),
@@ -138,7 +138,7 @@ class _EditProfileState extends State<EditProfile> {
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                hintText: 'Enter your Email...',
+                hintText: 'Enter your email...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Colors.white),
@@ -157,7 +157,7 @@ class _EditProfileState extends State<EditProfile> {
               controller: phoneController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                hintText: 'Enter your Phone...',
+                hintText: 'Enter your phone...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: AppStyles.hintColor),

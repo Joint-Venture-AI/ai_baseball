@@ -25,7 +25,7 @@ class NotificationScreen extends StatelessWidget {
           ), // Use const
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text('Arm Care', style: AppStyles.bodyMedium),
+        title: Text('Notifications', style: AppStyles.bodyMedium),
       ),
       body: ListView.builder(
         // body automatically takes the available space

@@ -1,5 +1,6 @@
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -40,6 +41,7 @@ class GlobWidgetHelper {
                       ),
                       onPressed: () {
                         // Handle notification tap
+                        Get.to(NotificationScreen());
                       },
                     ),
                   )

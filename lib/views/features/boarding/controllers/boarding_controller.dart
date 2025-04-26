@@ -29,9 +29,9 @@ class BoardingController extends GetxController {
   ];
 
   List<String> adviceText = [
-    '"l never let winning define me. I define myself by how I carry my character and values, whether I win or lose."__Simone Biles',
-    '"Success isn\'t always about greatness. It\'s about consistency. Consistent hard work leads to success."__Dwayne Johnson',
-    '"...Results come when you commit to the work nobody sees. "__Alex Rodriguez',
+    '"l never let winning define me. I define myself by how I carry my character and values, whether I win or lose."-Simone Biles',
+    '"Success isn\'t always about greatness. It\'s about consistency. Consistent hard work leads to success."-Dwayne Johnson',
+    '"...Results come when you commit to the work nobody sees. "-Alex Rodriguez',
   ];
 
   // --- End of potentially unused variables ---

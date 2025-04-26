@@ -197,7 +197,7 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
               label: 'What was your focus?',
               controller: _focusController,
               hint:
-                  '"Amount of pitches, today\'s focus"', // Quote marks included as per image hint
+                  'Describe what you focused on today...', // Quote marks included as per image hint
               maxLines: 3,
               keyboardType: TextInputType.multiline,
             ),

@@ -80,8 +80,8 @@ class ProfileComponents {
                   SizedBox(width: 15.w),
                   Expanded(
                     child: MyTextButton(
-                      buttonText: 'Submit',
-                      onTap: () {},
+                      buttonText: 'Yes, Logout',
+                      onTap: () => Navigator.pop(context),
                       isOutline: false,
                     ),
                   ),

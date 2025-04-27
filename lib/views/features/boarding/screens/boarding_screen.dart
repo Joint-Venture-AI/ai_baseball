@@ -35,7 +35,7 @@ class BoardingScreen extends StatelessWidget {
               Text(
                 'Prism',
                 style: AppStyles.bodyMedium.copyWith(
-                  color: Colors.white,
+                  color: AppStyles.primaryColor,
                   fontSize: 40.sp, // Use ScreenUtil for font size
                   fontWeight: FontWeight.w800,
                 ),

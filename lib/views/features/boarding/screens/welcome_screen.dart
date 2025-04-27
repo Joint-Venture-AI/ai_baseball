@@ -220,7 +220,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                       // --- Journal Frequency ---
                       Text(
-                        'how often do you journal?',
+                        'How often do you journal?',
                         style: AppStyles.bodyMedium,
                       ),
                       SizedBox(height: 10.h),
@@ -232,8 +232,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             // First row of radio buttons
                             children: [
                               _buildRadioOption<String>(
-                                title: 'never tried it',
-                                value: 'never',
+                                title: 'Never tried it',
+                                value: 'Never',
                                 groupValue: _selectedJournalFrequency,
                                 onChanged:
                                     (value) => setState(
@@ -242,8 +242,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ),
                               SizedBox(width: 25.w),
                               _buildRadioOption<String>(
-                                title: 'dabbled a little',
-                                value: 'dabbled',
+                                title: 'Dabbled a little',
+                                value: 'Dabbled',
                                 groupValue: _selectedJournalFrequency,
                                 onChanged:
                                     (value) => setState(
@@ -257,8 +257,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ), // Space before the next radio button
                           _buildRadioOption<String>(
                             // Second row (single button)
-                            title: 'pretty consistent',
-                            value: 'consistent',
+                            title: 'Pretty consistent',
+                            value: 'Consistent',
                             groupValue: _selectedJournalFrequency,
                             onChanged:
                                 (value) => setState(

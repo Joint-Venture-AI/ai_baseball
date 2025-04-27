@@ -5,6 +5,6 @@ class AuthBinding extends Bindings {
   @override
   void dependencies() {
     // TODO: implement dependencies
-    Get.lazyPut(() => AuthController());
+    Get.lazyPut(() => AuthController(), fenix: true);
   }
 }

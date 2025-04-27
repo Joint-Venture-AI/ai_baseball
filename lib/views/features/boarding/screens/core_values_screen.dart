@@ -30,6 +30,7 @@ class CoreValuesScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 10.h),
                     TextFormField(
+                      style: AppStyles.bodySmall,
                       decoration: InputDecoration(
                         hintText: 'Enter your name...',
                       ),

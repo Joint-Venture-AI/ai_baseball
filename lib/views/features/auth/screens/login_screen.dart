@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text('Email', style: AppStyles.bodySmall),
                   SizedBox(height: 8.h),
                   TextFormField(
+                    style: AppStyles.bodySmall,
                     decoration: InputDecoration(
                       hintText: 'Enter your email...',
                       // You might want to add specific styling for your inputs here
@@ -55,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text('Password', style: AppStyles.bodySmall),
                   SizedBox(height: 8.h),
                   TextFormField(
+                    style: AppStyles.bodySmall,
                     obscureText: !_isPasswordVisible, // Control visibility
                     decoration: InputDecoration(
                       hintText: 'Enter your password...',

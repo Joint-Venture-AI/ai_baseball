@@ -35,10 +35,12 @@ class PassSetScreen extends StatelessWidget {
               Text('Enter your new password', style: AppStyles.bodySmall),
               SizedBox(height: 10.h),
               TextField(
+                style: AppStyles.bodySmall,
                 decoration: InputDecoration(hintText: 'Enter password'),
               ),
               SizedBox(height: 8.h),
               TextField(
+                style: AppStyles.bodySmall,
                 decoration: InputDecoration(hintText: 'Re-enter password'),
               ),
               SizedBox(height: 20.h),

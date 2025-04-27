@@ -50,6 +50,7 @@ class OtpScreen extends StatelessWidget {
                       fieldHeight: 61.h,
                       fieldWidth: 71.w,
                       numberOfFields: 4,
+                      textStyle: AppStyles.bodySmall,
                       borderColor: Color.fromARGB(255, 34, 31, 41),
                       //set to true to show as box or false to show as dash
                       showFieldAsBox: true,

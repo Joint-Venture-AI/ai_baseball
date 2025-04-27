@@ -36,6 +36,7 @@ class ForgetPassScreen extends StatelessWidget {
               Text('Please enter your email here', style: AppStyles.bodySmall),
               SizedBox(height: 10.h),
               TextField(
+                style: AppStyles.bodySmall,
                 decoration: InputDecoration(hintText: 'Input your email'),
               ),
               SizedBox(height: 10.h),

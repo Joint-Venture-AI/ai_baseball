@@ -19,6 +19,7 @@ class NutritionScreen extends StatelessWidget {
         backgroundColor: AppStyles.cardColor,
         leading: SizedBox.shrink(),
         title: Text('Nutrition', style: AppStyles.headingTitle),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(

@@ -40,50 +40,25 @@ class ProgressScreen extends StatelessWidget {
               Obx(() {
                 return Row(
                   children: [
-                    // Slider
                     Expanded(
-                      child: SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 8.h, // Adjust track height
-                          thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 10.0,
-                          ), // Adjust thumb size
-                          overlayShape: const RoundSliderOverlayShape(
-                            overlayRadius: 20.0,
-                          ), // Adjust overlay size
-                          activeTrackColor:
-                              AppStyles.primaryColor, // Yellow track
-                          inactiveTrackColor:
-                              AppStyles.cardColor, // Dark grey inactive track
-                          thumbColor: Colors.white, // White thumb
-                          overlayColor: AppStyles.primaryColor.withOpacity(
-                            0.2,
-                          ), // Yellow overlay
-                          valueIndicatorColor:
-                              AppStyles.primaryColor, // Value indicator color
-                          valueIndicatorTextStyle:
-                              AppStyles
-                                  .buttonTextStyle, // Value indicator text style
-                        ),
-                        child: Slider(
-                          value: progressController.todayScale.value.toDouble(),
-                          min: 1.0, // Assuming a scale of 1 to 10
-                          max: 10.0,
-                          divisions: 9, // 1 through 10
-                          label:
-                              progressController.todayScale.round().toString(),
-                          onChanged: (newValue) {
-                            progressController.todayScale.value =
-                                newValue.toInt();
-                          },
-                        ),
+                      child: Slider(
+                        max: 10,
+                        min: 0,
+
+                        // Ensure the value is a double as required by Slider
+                        value: progressController.todayScale.value.toDouble(),
+                        activeColor: AppStyles.primaryColor,
+                        inactiveColor: AppStyles.hintTextColor,
+                        // Round the value to the nearest integer when changed
+                        onChanged: (v) {
+                          progressController.todayScale.value = v.round();
+                        },
                       ),
                     ),
-                    SizedBox(width: 10.w), // Space between slider and number
-                    // Display the current value
                     Text(
-                      progressController.todayScale.toString(),
-                      style: AppStyles.bodyMedium,
+                      // Display the integer value
+                      progressController.todayScale.value.toString(),
+                      style: AppStyles.bodySmall,
                     ),
                   ],
                 );

@@ -27,7 +27,7 @@ class MainParentController extends GetxController {
     AppIcons.home,
     AppIcons.progress,
     AppIcons.nutrition, // Use nutrition icon here
-    AppIcons.person,
+    AppIcons.personOutline,
   ];
 
   // Labels for the bottom tabs

@@ -1,0 +1,17 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_*.png
+/build
+
+# Android related
+android/.gradle/
+android/app/build/
+android/local.properties
+
+# iOS related
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework

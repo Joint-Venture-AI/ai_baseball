@@ -162,6 +162,7 @@ class AuthController extends GetxController {
         
         // Store access token securely
         _saveToken(response.data!.accessToken);
+        print('Access Token Saved: ${response.data!.accessToken}');
         
         // Show success message
         Get.snackbar(

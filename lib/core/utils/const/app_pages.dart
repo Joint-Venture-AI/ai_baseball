@@ -2,6 +2,9 @@ import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/views/features/auth/binding/auth_binding.dart';
 import 'package:baseball_ai/views/features/auth/screens/auth_screen.dart';
 import 'package:baseball_ai/views/features/auth/screens/login_screen.dart';
+import 'package:baseball_ai/views/features/auth/screens/forgot_password_screen.dart';
+import 'package:baseball_ai/views/features/auth/screens/otp_verification_screen.dart';
+import 'package:baseball_ai/views/features/auth/screens/reset_password_screen.dart';
 import 'package:baseball_ai/views/features/boarding/bindings/boarding_binding.dart';
 import 'package:baseball_ai/views/features/boarding/screens/boarding_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/bottom_nav/binding/main_parent_binding.dart';
@@ -60,6 +63,21 @@ class AppPages {
     GetPage(
       name: AppRoute.signIn,
       page: () => LoginScreen(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoute.forgotPassword,
+      page: () => const ForgotPasswordScreen(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoute.otp,
+      page: () => const OtpVerificationScreen(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoute.passSet,
+      page: () => const ResetPasswordScreen(),
       binding: AuthBinding(),
     ),
     GetPage(

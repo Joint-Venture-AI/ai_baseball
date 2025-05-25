@@ -3,10 +3,11 @@ import 'dart:io'; // Import for File type
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
-import 'package:baseball_ai/views/features/main_parent/profile/components/profile_components.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/edit_profile.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/privacy_policy.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
+import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,6 +21,7 @@ class ProfileScreen extends StatelessWidget {
   // Or use Get.put if this is the first place it's needed.
   // Assuming it's put here for simplicity based on original code.
   final ProfileController controller = Get.put(ProfileController());
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +68,17 @@ class ProfileScreen extends StatelessWidget {
                       title: "Privacy Policy",
                       ontap: () => Get.to(() => PrivacyPolicyScreen()),
                     ),
+                    // _buildProfileOption(
+                    //   icon: SvgPicture.asset(
+                    //     AppIcons.logout,
+                    //     color: Colors.red,
+                    //     width: 24.w,
+                    //     height: 24.h,
+                    //   ), // Explicit size for SVG
+                    //   title: "Logout",
+                    //   hasLast: false, // No trailing icon for logout
+                    //   ontap: () => _showLogoutDialog(),
+                    // ),
                     _buildProfileOption(
                       icon: SvgPicture.asset(
                         AppIcons.logout,
@@ -75,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
                       ), // Explicit size for SVG
                       title: "Logout",
                       hasLast: false, // No trailing icon for logout
-                      ontap: () => ProfileComponents.showLogOutSheet(context),
+                      ontap: () => showLogOutSheet(context,),
                     ),
                   ],
                 ),
@@ -91,44 +104,48 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildProfilePicture() {
     return Obx(() {
       final pickedImage = controller.pickedImage.value;
+      final user = authController.currentUser.value;
+      
       return InkWell(
         onTap: () async {
           await controller.pickImage();
         },
-        borderRadius: BorderRadius.circular(
-          100.r,
-        ), // Apply border radius to InkWell for visual feedback
+        borderRadius: BorderRadius.circular(100.r),
         child: Stack(
-          alignment: Alignment.center, // Center the image within the stack
+          alignment: Alignment.center,
           children: [
-            // Container to define the size and apply the circle crop
             Container(
               width: 100.w,
-              height: 100.w, // Use width for height to ensure a square
+              height: 100.w,
               decoration: BoxDecoration(
-                shape: BoxShape.circle, // Ensure a circle shape
+                shape: BoxShape.circle,
                 border: Border.all(
                   color: AppStyles.primaryColor,
                   width: 2,
-                ), // Optional border
-                color:
-                    AppStyles
-                        .cardColor, // Background color while loading/default
+                ),
+                color: AppStyles.cardColor,
               ),
               child: ClipOval(
-                // Use ClipOval for a perfect circle crop
-                child:
-                    pickedImage != null
-                        ? Image.file(
-                          File(
-                            pickedImage.path,
-                          ), // Ensure pickedImage is treated as a File
-                          fit: BoxFit.cover,
-                        )
+                child: pickedImage != null
+                    ? Image.file(
+                        File(pickedImage.path),
+                        fit: BoxFit.cover,
+                      )
+                    : user?.image != null && user!.image!.isNotEmpty
+                        ? Image.network(
+                            user.image!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                AppImages.avatarLogo,
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          )
                         : Image.asset(
-                          AppImages.avatarLogo, // Default avatar image
-                          fit: BoxFit.cover,
-                        ),
+                            AppImages.avatarLogo,
+                            fit: BoxFit.cover,
+                          ),
               ),
             ),
             // Positioned edit icon
@@ -136,21 +153,20 @@ class ProfileScreen extends StatelessWidget {
               bottom: 0,
               right: 0,
               child: Container(
-                padding: EdgeInsets.all(5.w), // Consistent padding
+                padding: EdgeInsets.all(5.w),
                 decoration: BoxDecoration(
                   color: AppStyles.primaryColor,
-                  shape:
-                      BoxShape.circle, // Make the edit icon background circular
+                  shape: BoxShape.circle,
                   border: Border.all(
                     color: AppStyles.backgroundColor,
                     width: 2,
-                  ), // Small border to lift from image
+                  ),
                 ),
                 child: Icon(
                   Icons.edit,
                   color: Colors.white,
                   size: 18.w,
-                ), // Scaled icon size
+                ),
               ),
             ),
           ],
@@ -161,19 +177,24 @@ class ProfileScreen extends StatelessWidget {
 
   /// Builds the user's name and email display section.
   Widget _buildUserInfo() {
-    // Use Obx here if name/email were coming from controller and could change
-    return Column(
-      children: [
-        // TODO: Replace with actual user name from controller/model
-        Text('John David', style: AppStyles.headingLarge),
-        SizedBox(height: 4.h),
-        // TODO: Replace with actual user email from controller/model
-        Text(
-          'john@gmail.com',
-          style: AppStyles.bodySmall.copyWith(color: AppStyles.primaryColor),
-        ),
-      ],
-    );
+    return Obx(() {
+      final user = authController.currentUser.value;
+      final fullName = user != null 
+          ? '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim()
+          : 'John David';
+      final email = user?.email ?? 'john@gmail.com';
+      
+      return Column(
+        children: [
+          Text(fullName.isNotEmpty ? fullName : 'User', style: AppStyles.headingLarge),
+          SizedBox(height: 4.h),
+          Text(
+            email,
+            style: AppStyles.bodySmall.copyWith(color: AppStyles.primaryColor),
+          ),
+        ],
+      );
+    });
   }
 
   /// Builds a single row for a profile option.
@@ -205,4 +226,102 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> showLogOutSheet(BuildContext context) {
+    return showModalBottomSheet(
+      backgroundColor: AppStyles.primaryColor,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      builder: (context) {
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+          decoration: BoxDecoration(
+            color: AppStyles.secondaryColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 38.w,
+                height: 3.h,
+                decoration: BoxDecoration(
+                  color: AppStyles.hintTextColor,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Text(
+                'Logout',
+                style: AppStyles.headingLarge.copyWith(
+                  color: Colors.red,
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Divider(thickness: 1, color: AppStyles.hintTextColor),
+              SizedBox(height: 15.h),
+              Text(
+                'Are you sure you want to logout?',
+                textAlign: TextAlign.center,
+                style: AppStyles.bodySmall.copyWith(
+                  color: Colors.white,
+                  fontSize: 18.sp,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: AppStyles.backgroundColor,
+                        ), // Blue outline
+                        backgroundColor: Colors.white, // White background
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            24.r,
+                          ), // Rounded corners
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: AppStyles.bodySmall.copyWith(
+                          color: Colors.black, // Blue text
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 15.w),
+                  Expanded(
+                    child: MyTextButton(
+                      buttonText: 'Yes, Logout',
+                      onTap: () {
+                        Get.back(); 
+                        authController.logout(); 
+                      },
+                      isOutline: false,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
+
+
+
+

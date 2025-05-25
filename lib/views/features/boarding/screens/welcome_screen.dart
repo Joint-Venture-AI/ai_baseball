@@ -1,11 +1,10 @@
+import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
-import 'package:baseball_ai/views/features/boarding/screens/core_values_screen.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:flutter/material.dart';
-// remove if not needed: import 'package:flutter/widgets.dart'; // Redundant import
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-// remove if not needed: import 'package:get/get_core/src/get_main.dart'; // Redundant import
 
 // Use StatefulWidget for local state management (radio buttons, password visibility)
 class WelcomeScreen extends StatefulWidget {
@@ -16,19 +15,155 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  // Get or initialize the auth controller
+  late final AuthController authController;
+  
+  // Form key for validation
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize AuthController if not already available
+    if (Get.isRegistered<AuthController>()) {
+      authController = Get.find<AuthController>();
+    } else {
+      authController = Get.put(AuthController());
+    }
+  }
+  
   // State variables
   bool _isPasswordVisible = false;
   String? _selectedPlayerType; // To hold the selected player type
   String? _selectedJournalFrequency; // To hold the selected journal frequency
   String? _selectedLevelOfSport; // To hold the selected level of sport
+  DateTime? _selectedBirthDate; // To hold the selected birth date
+  final TextEditingController _threeWordsController = TextEditingController(); // Controller for three words field
+
+  @override
+  void dispose() {
+    _threeWordsController.dispose();
+    super.dispose();
+  }
 
   // List of options for the Level of Sport dropdown
   final List<String> _levelOfSportOptions = [
-    'school',
-    'college',
-    'professional',
-    'other',
+    'School',
+    'College',
+    'Professional',
+    'Other',
   ];
+
+  // Handle signup process
+  void _handleSignup() async {
+    // Validate the form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Validate dropdown selections
+    if (_selectedLevelOfSport == null) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select your level of sport',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    if (_selectedPlayerType == null) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select your player type',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    if (_selectedJournalFrequency == null) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select how often you journal',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    if (_selectedBirthDate == null) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select your date of birth',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    // Map journal frequency to API format
+    String journalFrequencyApi;
+    switch (_selectedJournalFrequency) {
+      case 'Never':
+        journalFrequencyApi = 'Never tried it';
+        break;
+      case 'Dabbled':
+        journalFrequencyApi = 'Dabbled a little';
+        break;
+      case 'Consistent':
+        journalFrequencyApi = 'Pretty consistent';
+        break;
+      default:
+        journalFrequencyApi = 'Never tried it';
+    }
+
+    // Call the signup method
+    await authController.signup(
+      name: authController.nameController.text.trim(),
+      email: authController.emailController.text.trim(),
+      password: authController.passwordController.text.trim(),
+      levelOfSport: _selectedLevelOfSport!,
+      playerType: _selectedPlayerType!,
+      howOftenDoYouJournal: journalFrequencyApi,
+      threeWordThtDescribeYou: _threeWordsController.text.trim().isNotEmpty 
+          ? _threeWordsController.text.trim() 
+          : null,
+      birthDate: _selectedBirthDate,
+    );
+  }
+
+  // Method to select birth date
+  Future<void> _selectBirthDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedBirthDate ?? DateTime(2000), // Default to year 2000
+      firstDate: DateTime(1950), // Earliest allowed date
+      lastDate: DateTime.now().subtract(Duration(days: 365 * 10)), // Must be at least 10 years old
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: AppStyles.primaryColor,
+              onPrimary: Colors.black,
+              surface: AppStyles.cardColor,
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedBirthDate) {
+      setState(() {
+        _selectedBirthDate = picked;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +198,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 SizedBox(height: 30.h),
                 Form(
+                  key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -70,10 +206,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Text('Name', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h), // Consistent spacing
                       TextFormField(
+                        controller: authController.nameController,
                         style: AppStyles.bodySmall,
                         decoration: InputDecoration(
                           hintText: 'Enter your name...',
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
                       ),
                       SizedBox(
                         height: 18.h,
@@ -82,11 +225,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Text('Email', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h),
                       TextFormField(
+                        controller: authController.emailController,
                         style: AppStyles.bodySmall,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'Enter your email...',
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!GetUtils.isEmail(value.trim())) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
                       ),
                       SizedBox(height: 18.h),
 
@@ -94,6 +247,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Text('Password', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h),
                       TextFormField(
+                        controller: authController.passwordController,
                         style: AppStyles.bodySmall,
                         obscureText: !_isPasswordVisible, // Toggle visibility
                         decoration: InputDecoration(
@@ -112,8 +266,65 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             },
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
                       ),
                       SizedBox(height: 18.h),
+
+                      // --- Date of Birth ---
+                      Text('Date of Birth', style: AppStyles.bodyMedium),
+                      SizedBox(height: 8.h),
+                      GestureDetector(
+                        onTap: () => _selectBirthDate(context),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white54),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _selectedBirthDate != null
+                                    ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
+                                    : 'Select your birth date...',
+                                style: AppStyles.bodySmall.copyWith(
+                                  color: _selectedBirthDate != null 
+                                      ? Colors.white 
+                                      : Colors.white54,
+                                ),
+                              ),
+                              Icon(
+                                Icons.calendar_today,
+                                color: AppStyles.subtitleColor,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 18.h),
+
+                      // --- Three Words That Describe You ---
+                      Text('Three Words That Describe You (Optional)', style: AppStyles.bodyMedium),
+                      SizedBox(height: 8.h),
+                      TextFormField(
+                        controller: _threeWordsController,
+                        style: AppStyles.bodySmall,
+                        decoration: InputDecoration(
+                          hintText: 'e.g., Determined, Focused, Resilient...',
+                        ),
+                      ),
+                      SizedBox(height: 18.h),
+                      
                       Text('Level of Sport', style: AppStyles.bodyMedium),
                       SizedBox(height: 8.h),
 
@@ -173,7 +384,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               return DropdownMenuItem<String>(
                                 value: level,
                                 child: Text(
-                                  level.capitalizeFirst!,
+                                  level,
                                   style: AppStyles.bodySmall.copyWith(
                                     color:
                                         Colors
@@ -199,7 +410,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         children: [
                           _buildRadioOption<String>(
                             title: 'Pitcher',
-                            value: 'pitcher',
+                            value: 'Pitcher',
                             groupValue: _selectedPlayerType,
                             onChanged:
                                 (value) =>
@@ -208,7 +419,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           SizedBox(width: 25.w),
                           _buildRadioOption<String>(
                             title: 'Position Player',
-                            value: 'position_player',
+                            value: 'Position Player',
                             groupValue: _selectedPlayerType,
                             onChanged:
                                 (value) =>
@@ -306,25 +517,39 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                       SizedBox(height: 30.h), // Space before Button
                       // --- Next Button ---
-                      MyTextButton(
+                      Obx(() => MyTextButton(
                         isOutline: false,
-                        buttonText: 'Next',
+                        buttonText: authController.isSignupLoading.value 
+                            ? 'Creating Account...' 
+                            : 'Next',
                         onTap: () {
-                          // Add form validation here if needed before navigating
-                          // Access selected values like:
-                          // print('Name: ${nameController.text}'); // (if using controllers)
-                          // print('Email: ${emailController.text}'); // (if using controllers)
-                          // print('Password: ${passwordController.text}'); // (if using controllers)
-                          print('Level of Sport: $_selectedLevelOfSport');
-                          print('Player Type: $_selectedPlayerType');
-                          print(
-                            'Journal Frequency: $_selectedJournalFrequency',
-                          );
-
-                          Get.to(
-                            () => const CoreValuesScreen(),
-                          ); // Ensure CoreValuesScreen is imported
+                          if (!authController.isSignupLoading.value) {
+                            _handleSignup();
+                          }
                         },
+                      )),
+                      SizedBox(height: 15.h),
+                      // Login link for existing users
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Already have an account? ',
+                            style: AppStyles.bodySmall.copyWith(
+                              color: AppStyles.subtitleColor,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Get.toNamed(AppRoute.signIn),
+                            child: Text(
+                              'Login',
+                              style: AppStyles.bodySmall.copyWith(
+                                color: AppStyles.primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 20.h), // Bottom padding
                     ],

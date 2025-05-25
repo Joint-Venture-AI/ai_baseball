@@ -1,12 +1,11 @@
-import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
-import 'package:baseball_ai/views/features/auth/screens/forget_pass_screen.dart';
+import 'package:baseball_ai/core/utils/const/app_route.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:baseball_ai/views/features/boarding/screens/welcome_screen.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 // Convert to StatefulWidget
 class LoginScreen extends StatefulWidget {
@@ -19,6 +18,32 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // State variable to track password visibility
   bool _isPasswordVisible = false;
+  
+  // Get AuthController instance
+  final AuthController authController = Get.find<AuthController>();
+  
+  // Form key for validation
+  final _formKey = GlobalKey<FormState>();
+  
+  // Text controllers
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleLogin() {
+    if (_formKey.currentState!.validate()) {
+      authController.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 15.h),
             Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -43,21 +69,40 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text('Email', style: AppStyles.bodySmall),
                   SizedBox(height: 8.h),
                   TextFormField(
+                    controller: _emailController,
                     style: AppStyles.bodySmall,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!GetUtils.isEmail(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       hintText: 'Enter your email...',
                       // You might want to add specific styling for your inputs here
                       // matching your AppStyles if needed.
                     ),
-                    keyboardType:
-                        TextInputType.emailAddress, // Good practice for email
                   ),
                   SizedBox(height: 10.h),
                   Text('Password', style: AppStyles.bodySmall),
                   SizedBox(height: 8.h),
                   TextFormField(
+                    controller: _passwordController,
                     style: AppStyles.bodySmall,
                     obscureText: !_isPasswordVisible, // Control visibility
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       hintText: 'Enter your password...',
                       // Add the suffix icon (the eye)
@@ -86,9 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => Get.to(ForgetPassScreen()),
+                onPressed: () => Get.toNamed(AppRoute.forgotPassword),
                 child: Text(
-                  'Forget Password', // Consider making this a TextButton for interaction
+                  'Forgot Password?',
                   style: AppStyles.bodySmall.copyWith(
                     color: AppStyles.primaryColor,
                   ),
@@ -96,11 +141,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             SizedBox(height: 10.h),
-            MyTextButton(
-              buttonText: 'Login',
-              onTap: () => Get.toNamed(AppRoute.main),
+            Obx(() => MyTextButton(
+              buttonText: authController.isLoginLoading.value ? 'Logging in...' : 'Login',
+              onTap: authController.isLoginLoading.value ? () {} : _handleLogin,
               isOutline: false,
-            ),
+            )),
             SizedBox(height: 15.h),
             Row(
               // Consider making SignUp tappable with GestureDetector or TextButton.rich

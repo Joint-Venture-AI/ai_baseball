@@ -8,6 +8,9 @@ class AppRoute {
 
   static String auth = '/auth';
   static String signIn = '/signIn';
+  static String forgotPassword = '/forgotPassword';
+  static String otp = '/otp';
+  static String passSet = '/passSet';
   static String homethrowing = '/homethrowing';
   static String armCare = '/armCare';
   static String lifting = '/lifting';

@@ -1,5 +1,8 @@
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/arm_care/arm_care_screen.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
+import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
+import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 class EditProfile extends StatefulWidget {
@@ -10,22 +13,8 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController nicknameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
+  final ProfileController controller = Get.find<ProfileController>();
   DateTime? selectedDate;
-
-  @override
-  void dispose() {
-    fullNameController.dispose();
-    nicknameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    addressController.dispose();
-    super.dispose();
-  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -51,64 +40,145 @@ class _EditProfileState extends State<EditProfile> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Edit Profile', style: AppStyles.headingTitle),
+        title: Text(
+          'Edit Profile',
+          style: AppStyles.bodyMedium.copyWith(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Full Name',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            // Profile Image Section
+            Center(
+              child: Stack(
+                children: [
+                  Obx(() => Container(
+                    width: 100.w,
+                    height: 100.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppStyles.cardColor,
+                      border: Border.all(color: AppStyles.primaryColor, width: 2),
+                    ),
+                    child: controller.pickedImage.value != null
+                        ? ClipOval(
+                            child: Image.file(
+                              controller.pickedImage.value!,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Icon(
+                            Icons.person,
+                            size: 50.w,
+                            color: AppStyles.primaryColor,
+                          ),
+                  )),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => controller.pickImage(),
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: AppStyles.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: Colors.black,
+                          size: 16.w,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 24.h),
+            
+            // First Name
+            Text(
+              'First Name',
+              style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 8.h),
             TextFormField(
-              style: AppStyles.bodyText,
-
-              controller: fullNameController,
+              style: AppStyles.bodySmall,
+              controller: controller.firstNameController,
               decoration: InputDecoration(
                 hintText: 'Enter your first name...',
+                hintStyle: TextStyle(color: AppStyles.hintTextColor),
+                filled: true,
+                fillColor: AppStyles.cardColor,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppStyles.hintColor),
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: AppStyles.borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: AppStyles.primaryColor),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Nickname',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            SizedBox(height: 16.h),
+            
+            // Last Name
+            Text(
+              'Last Name',
+              style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             TextFormField(
-              style: AppStyles.bodyText,
-
-              controller: nicknameController,
+              style: AppStyles.bodySmall,
+              controller: controller.lastNameController,
               decoration: InputDecoration(
                 hintText: 'Enter your last name...',
+                hintStyle: TextStyle(color: AppStyles.hintTextColor),
+                filled: true,
+                fillColor: AppStyles.cardColor,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppStyles.hintColor),
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: AppStyles.borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: AppStyles.primaryColor),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16.h),
+            
+            // Date of Birth
+            Text(
               'Date of Birth',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             GestureDetector(
               onTap: () => _selectDate(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 12,
+                padding: EdgeInsets.symmetric(
+                  vertical: 12.h,
+                  horizontal: 12.w,
                 ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white),
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppStyles.cardColor,
+                  border: Border.all(color: AppStyles.borderColor),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,74 +187,68 @@ class _EditProfileState extends State<EditProfile> {
                       selectedDate == null
                           ? 'Date of Birth'
                           : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-                      style: TextStyle(
-                        color:
-                            selectedDate == null ? Colors.grey : Colors.white,
+                      style: AppStyles.bodySmall.copyWith(
+                        color: selectedDate == null 
+                            ? AppStyles.hintTextColor 
+                            : AppStyles.textPrimaryColor,
                       ),
                     ),
-                    Icon(Icons.calendar_today, color: Colors.white),
+                    Icon(
+                      Icons.calendar_today, 
+                      color: AppStyles.primaryColor, 
+                      size: 20.w
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16.h),
+            
+            // Email (readonly)
+            Text(
               'Email',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             TextFormField(
-              style: AppStyles.bodyText,
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
+              style: AppStyles.bodySmall,
+              controller: controller.emailController,
+              enabled: false, // Email should not be editable
               decoration: InputDecoration(
-                hintText: 'Enter your email...',
+                hintText: 'Email address',
+                hintStyle: TextStyle(color: AppStyles.hintTextColor),
+                filled: true,
+                fillColor: AppStyles.cardColor.withOpacity(0.5),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.white),
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: AppStyles.borderColor),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(
+                    color: AppStyles.borderColor.withOpacity(0.5)
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Phone',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              style: AppStyles.bodyText,
-
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                hintText: 'Enter your phone...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppStyles.hintColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Address',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              style: AppStyles.bodyText,
-
-              controller: addressController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Address',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppStyles.hintColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            MyTextButton(buttonText: 'Submit', onTap: () {}, isOutline: false),
+            SizedBox(height: 24.h),
+            
+            // Submit Button
+            Obx(() => MyTextButton(
+              buttonText: controller.isUpdatingProfile.value 
+                  ? 'Updating...' 
+                  : 'Update Profile',
+              onTap: () {
+                if (!controller.isUpdatingProfile.value) {
+                  controller.updateProfile();
+                }
+              },
+              isOutline: false,
+            )),
           ],
         ),
       ),

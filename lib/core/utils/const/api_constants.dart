@@ -7,10 +7,12 @@ class ApiConstants {
   static const String forgotPassword = '/auth/forgot-password';
   static const String verifyEmail = '/auth/verify-email';
   static const String resetPassword = '/auth/reset-password';
-  
-  // Profile Endpoints
+    // Profile Endpoints
   static const String getProfile = '/user/getme';
   static const String updateProfile = '/user';
+  
+  // Chat Endpoints
+  static const String chatWithBot = '/daily-logs/chat';
   
   // Headers
   static const Map<String, String> headers = {

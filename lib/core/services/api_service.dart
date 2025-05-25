@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:baseball_ai/core/utils/const/api_constants.dart';
 import 'package:baseball_ai/core/models/user_model.dart';
+import 'package:baseball_ai/core/models/chat_model.dart';
 
 class ApiService {
   static Future<ApiResponse<User>> signup(SignupRequest request) async {
@@ -366,11 +367,65 @@ class ApiService {
         success: false,
         message: 'Invalid response format',
         error: 'Server returned invalid data',
-      );
-    } catch (e) {
+      );    } catch (e) {
       return ApiResponse<User>(
         success: false,
         message: 'Failed to update profile',
+        error: e.toString(),
+      );
+    }
+  }
+
+  // Chat API methods
+  static Future<ApiResponse<ChatResponse>> sendChatMessage({
+    required String token,
+    required String userId,
+    required String message,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.chatWithBot}');
+      
+      final requestBody = {
+        'userId': userId,
+        'message': message,
+      };
+
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(requestBody),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return ApiResponse<ChatResponse>.fromJson(
+          responseData,
+          (data) => ChatResponse.fromJson(responseData),
+        );
+      } else {
+        return ApiResponse<ChatResponse>(
+          success: false,
+          message: responseData['message'] ?? 'Failed to send message',
+          error: responseData['error'] ?? 'Unknown error occurred',
+        );
+      }
+    } on SocketException {
+      return ApiResponse<ChatResponse>(
+        success: false,
+        message: 'No internet connection',
+        error: 'Please check your internet connection and try again',
+      );
+    } on FormatException {
+      return ApiResponse<ChatResponse>(
+        success: false,
+        message: 'Invalid response format',
+        error: 'Server returned invalid data',
+      );
+    } catch (e) {
+      return ApiResponse<ChatResponse>(
+        success: false,
+        message: 'Failed to send message',
         error: e.toString(),
       );
     }

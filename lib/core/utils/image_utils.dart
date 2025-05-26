@@ -36,7 +36,7 @@ class ImageUtils {
       return 'https://\$trimmedUrl';
     } else {
       // Relative path or just filename
-      final String imageBaseUrl = _getImageBaseUrl();
+      _getImageBaseUrl();
       if (trimmedUrl.startsWith('/')) {
         // Path starts with a slash, e.g. /uploads/image.jpg
         return '\$imageBaseUrl\$trimmedUrl';

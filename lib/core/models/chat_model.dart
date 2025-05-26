@@ -86,7 +86,7 @@ class ChatResponse {
     return ChatResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      response: json['response'] ?? json['data'],
+      response: json['response'] ?? json['data']?['reply'],
       error: json['error'],
     );
   }

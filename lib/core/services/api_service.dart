@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:baseball_ai/core/utils/const/api_constants.dart';
 import 'package:baseball_ai/core/models/user_model.dart';
 import 'package:baseball_ai/core/models/chat_model.dart';
@@ -304,11 +306,10 @@ class ApiService {
       );
     }
   }
-
   static Future<ApiResponse<User>> updateProfile({
     required String token,
     String? name,
-    String? lastName,
+    DateTime? birthDate,
     File? imageFile,
   }) async {
     try {
@@ -320,14 +321,25 @@ class ApiService {
       // Prepare the data object
       Map<String, dynamic> dataObject = {};
       if (name != null) dataObject['name'] = name;
+      if (birthDate != null) dataObject['birthDate'] = birthDate.toIso8601String();
       
       // Add the data field as JSON string
       if (dataObject.isNotEmpty) {
         request.fields['data'] = jsonEncode(dataObject);
       }
-      
-      // Add image file if provided
+        // Add image file if provided
       if (imageFile != null) {
+        // Get MIME type from file extension
+        String? mimeType = lookupMimeType(imageFile.path);
+        
+        // Default to image/jpeg if MIME type cannot be determined
+        mimeType ??= 'image/jpeg';
+        
+        // Split MIME type to get main type and subtype
+        final mimeTypeParts = mimeType.split('/');
+        final mainType = mimeTypeParts.isNotEmpty ? mimeTypeParts[0] : 'image';
+        final subType = mimeTypeParts.length > 1 ? mimeTypeParts[1] : 'jpeg';
+        
         var stream = http.ByteStream(imageFile.openRead());
         var length = await imageFile.length();
         var multipartFile = http.MultipartFile(
@@ -335,6 +347,7 @@ class ApiService {
           stream,
           length,
           filename: imageFile.path.split('/').last,
+          contentType: MediaType(mainType, subType),
         );
         request.files.add(multipartFile);
       }
@@ -429,4 +442,5 @@ class ApiService {
       );
     }
   }
+
 }

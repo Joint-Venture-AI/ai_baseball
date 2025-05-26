@@ -117,11 +117,15 @@ class NutritionScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 15.h),
-                MyTextButton(
-                  buttonText: 'Submit',
-                  onTap: () {},
+                Obx(() => MyTextButton(
+                  buttonText: nutritionController.isSubmitting.value 
+                      ? 'Submitting...' 
+                      : 'Submit',
+                  onTap: nutritionController.isSubmitting.value 
+                      ? () {} 
+                      : () => nutritionController.submitNutrition(),
                   isOutline: false,
-                ),
+                )),
 
                 SizedBox(height: 50.h),
               ],

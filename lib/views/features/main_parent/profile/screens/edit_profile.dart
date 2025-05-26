@@ -1,6 +1,7 @@
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/core/widgets/safe_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -14,19 +15,16 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   final ProfileController controller = Get.find<ProfileController>();
-  DateTime? selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
+      initialDate: controller.selectedDate.value ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
+    if (picked != null && picked != controller.selectedDate.value) {
+      controller.selectedDate.value = picked;
     }
   }
 
@@ -57,27 +55,44 @@ class _EditProfileState extends State<EditProfile> {
             Center(
               child: Stack(
                 children: [
-                  Obx(() => Container(
-                    width: 100.w,
-                    height: 100.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppStyles.cardColor,
-                      border: Border.all(color: AppStyles.primaryColor, width: 2),
-                    ),
-                    child: controller.pickedImage.value != null
-                        ? ClipOval(
-                            child: Image.file(
-                              controller.pickedImage.value!,
+                  Obx(() {
+                    final currentUser = controller.authController.currentUser.value;
+                    return Container(
+                      width: 100.w,
+                      height: 100.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppStyles.cardColor,
+                        border: Border.all(color: AppStyles.primaryColor, width: 2),
+                      ),
+                      child: controller.pickedImage.value != null
+                          ? ClipOval(
+                              child: Image.file(
+                                controller.pickedImage.value!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : SafeNetworkImage(
+                              imageUrl: currentUser?.image,
+                              width: 96.w,
+                              height: 96.w,
+                              isCircular: true,
                               fit: BoxFit.cover,
+                              backgroundColor: AppStyles.cardColor,
+                              errorWidget: Icon(
+                                Icons.person,
+                                size: 50.w,
+                                color: AppStyles.primaryColor,
+                              ),
+                              loadingWidget: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppStyles.primaryColor,
+                                  strokeWidth: 2,
+                                ),
+                              ),
                             ),
-                          )
-                        : Icon(
-                            Icons.person,
-                            size: 50.w,
-                            color: AppStyles.primaryColor,
-                          ),
-                  )),
+                    );
+                  }),
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -104,15 +119,15 @@ class _EditProfileState extends State<EditProfile> {
             
             // First Name
             Text(
-              'First Name',
+              'Full Name',
               style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 8.h),
             TextFormField(
               style: AppStyles.bodySmall,
-              controller: controller.firstNameController,
+              controller: controller.fullNameController,
               decoration: InputDecoration(
-                hintText: 'Enter your first name...',
+                hintText: 'Enter your full name...',
                 hintStyle: TextStyle(color: AppStyles.hintTextColor),
                 filled: true,
                 fillColor: AppStyles.cardColor,
@@ -131,36 +146,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
             SizedBox(height: 16.h),
-            
-            // Last Name
-            Text(
-              'Last Name',
-              style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
-            ),
-            SizedBox(height: 8.h),
-            TextFormField(
-              style: AppStyles.bodySmall,
-              controller: controller.lastNameController,
-              decoration: InputDecoration(
-                hintText: 'Enter your last name...',
-                hintStyle: TextStyle(color: AppStyles.hintTextColor),
-                filled: true,
-                fillColor: AppStyles.cardColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: AppStyles.borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: AppStyles.primaryColor),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
+          
             
             // Date of Birth
             Text(
@@ -183,16 +169,16 @@ class _EditProfileState extends State<EditProfile> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      selectedDate == null
+                    Obx(() => Text(
+                      controller.selectedDate.value == null
                           ? 'Date of Birth'
-                          : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                          : '${controller.selectedDate.value!.day}/${controller.selectedDate.value!.month}/${controller.selectedDate.value!.year}',
                       style: AppStyles.bodySmall.copyWith(
-                        color: selectedDate == null 
+                        color: controller.selectedDate.value == null 
                             ? AppStyles.hintTextColor 
                             : AppStyles.textPrimaryColor,
                       ),
-                    ),
+                    )),
                     Icon(
                       Icons.calendar_today, 
                       color: AppStyles.primaryColor, 

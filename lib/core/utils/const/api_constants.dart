@@ -10,9 +10,14 @@ class ApiConstants {
     // Profile Endpoints
   static const String getProfile = '/user/getme';
   static const String updateProfile = '/user';
-  
   // Chat Endpoints
   static const String chatWithBot = '/daily-logs/chat';
+  
+  // Nutrition Endpoints
+  static const String nutrition = '/nutrition';
+  
+  // Daily Logs Endpoints
+  static const String dailyLogs = '/daily-logs';
   
   // Headers
   static const Map<String, String> headers = {

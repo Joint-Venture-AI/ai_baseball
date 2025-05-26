@@ -81,12 +81,23 @@ class ChatResponse {
     this.response,
     this.error,
   });
-
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
+    // Extract bot response from nested data structure
+    String? extractedResponse;
+    if (json['data'] != null) {
+      if (json['data'] is Map<String, dynamic>) {
+        // Handle nested structure: data.reply
+        extractedResponse = json['data']['reply'] ?? json['data']['response'];
+      } else if (json['data'] is String) {
+        // Handle direct string data
+        extractedResponse = json['data'];
+      }
+    }
+    
     return ChatResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      response: json['response'] ?? json['data'],
+      response: json['response'] ?? extractedResponse,
       error: json['error'],
     );
   }

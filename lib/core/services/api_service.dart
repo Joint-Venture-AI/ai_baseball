@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:baseball_ai/core/utils/const/api_constants.dart';
 import 'package:baseball_ai/core/models/user_model.dart';
 import 'package:baseball_ai/core/models/chat_model.dart';
+import 'package:baseball_ai/core/models/daily_logs_model.dart';
+import 'package:baseball_ai/core/models/nutrition_model.dart';
 
 class ApiService {
   static Future<ApiResponse<User>> signup(SignupRequest request) async {
@@ -304,11 +308,10 @@ class ApiService {
       );
     }
   }
-
   static Future<ApiResponse<User>> updateProfile({
     required String token,
-    String? firstName,
-    String? lastName,
+    String? name,
+    DateTime? birthDate,
     File? imageFile,
   }) async {
     try {
@@ -319,16 +322,26 @@ class ApiService {
       
       // Prepare the data object
       Map<String, dynamic> dataObject = {};
-      if (firstName != null) dataObject['firstName'] = firstName;
-      if (lastName != null) dataObject['lastName'] = lastName;
+      if (name != null) dataObject['name'] = name;
+      if (birthDate != null) dataObject['birthDate'] = birthDate.toIso8601String();
       
       // Add the data field as JSON string
       if (dataObject.isNotEmpty) {
         request.fields['data'] = jsonEncode(dataObject);
       }
-      
-      // Add image file if provided
+        // Add image file if provided
       if (imageFile != null) {
+        // Get MIME type from file extension
+        String? mimeType = lookupMimeType(imageFile.path);
+        
+        // Default to image/jpeg if MIME type cannot be determined
+        mimeType ??= 'image/jpeg';
+        
+        // Split MIME type to get main type and subtype
+        final mimeTypeParts = mimeType.split('/');
+        final mainType = mimeTypeParts.isNotEmpty ? mimeTypeParts[0] : 'image';
+        final subType = mimeTypeParts.length > 1 ? mimeTypeParts[1] : 'jpeg';
+        
         var stream = http.ByteStream(imageFile.openRead());
         var length = await imageFile.length();
         var multipartFile = http.MultipartFile(
@@ -336,6 +349,7 @@ class ApiService {
           stream,
           length,
           filename: imageFile.path.split('/').last,
+          contentType: MediaType(mainType, subType),
         );
         request.files.add(multipartFile);
       }
@@ -426,6 +440,103 @@ class ApiService {
       return ApiResponse<ChatResponse>(
         success: false,
         message: 'Failed to send message',
+        error: e.toString(),
+      );
+    }
+  }
+
+  // Nutrition API methods
+  static Future<ApiResponse<NutritionResponse>> submitNutrition({
+    required String token,
+    required NutritionRequest request,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.nutrition}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(request.toJson()),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ApiResponse<NutritionResponse>.fromJson(
+          responseData,
+          (data) => NutritionResponse.fromJson(responseData),
+        );
+      } else {
+        return ApiResponse<NutritionResponse>(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit nutrition',
+          error: responseData['error'] ?? 'Unknown error occurred',
+        );
+      }
+    } on SocketException {
+      return ApiResponse<NutritionResponse>(
+        success: false,
+        message: 'No internet connection',
+        error: 'Please check your internet connection and try again',
+      );
+    } on FormatException {
+      return ApiResponse<NutritionResponse>(
+        success: false,
+        message: 'Invalid response format',
+        error: 'Server returned invalid data',
+      );    } catch (e) {
+      return ApiResponse<NutritionResponse>(
+        success: false,
+        message: 'Failed to submit nutrition',
+        error: e.toString(),
+      );
+    }
+  }
+
+  // Daily Logs API methods
+  static Future<ApiResponse<DailyLogsResponse>> submitDailyLogs({
+    required String token,
+    required DailyLogsRequest request,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dailyLogs}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(request.toJson()),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ApiResponse<DailyLogsResponse>.fromJson(
+          responseData,
+          (data) => DailyLogsResponse.fromJson(responseData),
+        );
+      } else {
+        return ApiResponse<DailyLogsResponse>(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit daily logs',
+          error: responseData['error'] ?? 'Unknown error occurred',
+        );
+      }
+    } on SocketException {
+      return ApiResponse<DailyLogsResponse>(
+        success: false,
+        message: 'No internet connection',
+        error: 'Please check your internet connection and try again',
+      );
+    } on FormatException {
+      return ApiResponse<DailyLogsResponse>(
+        success: false,
+        message: 'Invalid response format',
+        error: 'Server returned invalid data',
+      );
+    } catch (e) {
+      return ApiResponse<DailyLogsResponse>(
+        success: false,
+        message: 'Failed to submit daily logs',
         error: e.toString(),
       );
     }

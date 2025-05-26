@@ -128,10 +128,10 @@ class ProgressScreen extends StatelessWidget {
               ),
               SizedBox(height: 10.h), // Spacing above text field
               TextFormField(
+                controller: progressController.resultsController,
                 style: AppStyles.bodySmall,
                 // Set the text color for input
                 cursorColor: AppStyles.primaryColor, // Set cursor color
-                // TODO: Add controller for this TextFormField
                 decoration: InputDecoration(
                   hintText: 'Today\'s results, stats, etc...', // Matches image
                   enabledBorder: OutlineInputBorder(
@@ -166,6 +166,7 @@ class ProgressScreen extends StatelessWidget {
               ),
               SizedBox(height: 8.h), // Spacing above text field
               TextFormField(
+                controller: progressController.takeawayController,
                 style: AppStyles.bodySmall,
                 // Set the text color for input
                 cursorColor: AppStyles.primaryColor, // Set cursor color
@@ -206,18 +207,15 @@ class ProgressScreen extends StatelessWidget {
                   horizontal: 0.w,
                   vertical: 20.h,
                 ), // Adjusted vertical padding
-                child: MyTextButton(
+                child: Obx(() => MyTextButton(
                   isOutline: false,
-                  buttonText: 'Submit',
-                  onTap: () {
-                    // Access controller values like:
-                    // final scale = progressController.todayScale.value;
-                    // final workload = progressController.workloadType.value;
-                    // final results = // Get text from results TextFormField controller
-                    // final takeaway = // Get text from takeaway TextFormField controller
-                    // TODO: Implement submit logic using controller data
-                  },
-                ),
+                  buttonText: progressController.isSubmitting.value 
+                      ? 'Submitting...' 
+                      : 'Submit',
+                  onTap: progressController.isSubmitting.value 
+                      ? () {} 
+                      : () => progressController.submitProgress(),
+                )),
               ),
             ],
           ),

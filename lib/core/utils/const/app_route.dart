@@ -1,4 +1,5 @@
 class AppRoute {
+  static String splash = '/splash';
   static String boarding = '/boarding';
   static String home = '/home';
   static String main = '/mainTab';

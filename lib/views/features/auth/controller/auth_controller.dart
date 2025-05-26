@@ -69,7 +69,7 @@ class AuthController extends GetxController {
     }
   }
 
-  void _clearToken() {
+  void clearToken() {
     _storage.remove('access_token');
     accessToken.value = '';
     currentUser.value = null;
@@ -386,9 +386,34 @@ class AuthController extends GetxController {
     }
   }
 
+  /// Silent profile fetching for auto-login - doesn't show error snackbars
+  Future<bool> getProfileSilently() async {
+    try {
+      if (accessToken.value.isEmpty) {
+        print('🔓 No access token found for silent profile fetch');
+        return false;
+      }
+
+      print('📡 Fetching profile silently...');
+      final response = await ApiService.getProfile(accessToken.value);
+
+      if (response.success && response.data != null) {
+        currentUser.value = response.data;
+        print('✅ Profile fetched successfully: ${response.data!.name}');
+        return true;
+      } else {
+        print('❌ Failed to fetch profile: ${response.message}');
+        return false;
+      }
+    } catch (e) {
+      print('💥 Error fetching profile silently: ${e.toString()}');
+      return false;
+    }
+  }
+
   // Logout method
   void logout() {
-    _clearToken();
+    clearToken();
     Get.offAllNamed(AppRoute.auth);
   }
 

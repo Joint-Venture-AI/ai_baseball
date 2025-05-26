@@ -3,6 +3,7 @@ import 'dart:io'; // Import for File type
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/core/widgets/safe_network_image.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/edit_profile.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/privacy_policy.dart';
@@ -132,15 +133,24 @@ class ProfileScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       )
                     : user?.image != null && user!.image!.isNotEmpty
-                        ? Image.network(
-                            user.image!,
+                        ?SafeNetworkImage(
+                            imageUrl: user.image!,
+                            width: 100.w,
+                            height: 100.w,
+                            isCircular: true,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                AppImages.avatarLogo,
-                                fit: BoxFit.cover,
-                              );
-                            },
+                            backgroundColor: AppStyles.cardColor,
+                            errorWidget: Icon(
+                              Icons.person,
+                              size: 50.w,
+                              color: AppStyles.primaryColor,
+                            ),
+                            loadingWidget: Center(
+                              child: CircularProgressIndicator(
+                                color: AppStyles.primaryColor,
+                                strokeWidth: 2,
+                              ),
+                            ),
                           )
                         : Image.asset(
                             AppImages.avatarLogo,
@@ -180,7 +190,7 @@ class ProfileScreen extends StatelessWidget {
     return Obx(() {
       final user = authController.currentUser.value;
       final fullName = user != null 
-          ? '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim()
+          ? user.name.trim() 
           : 'John David';
       final email = user?.email ?? 'john@gmail.com';
       

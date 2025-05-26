@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       builder:
           (context, child) => GetMaterialApp(
             theme: MyThemeData.theme,
-            initialRoute: AppRoute.boarding,
+            initialRoute: AppRoute.splash,
             getPages: AppPages.app_pages,
           ),
     );

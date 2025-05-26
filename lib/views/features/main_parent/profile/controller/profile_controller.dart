@@ -15,27 +15,21 @@ class ProfileController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
   
   DateTime dateTime = DateTime.now();
   
   // Get AuthController instance
   AuthController get authController => Get.find<AuthController>();
-  
-  @override
+    @override
   void onInit() async {
     super.onInit();
-    _loadUserData();
+    loadUserData();
   }
-
-  void _loadUserData() {
+  void loadUserData() {
     final user = authController.currentUser.value;
     if (user != null) {
-      firstNameController.text = user.firstName ?? '';
-      lastNameController.text = user.lastName ?? '';
       emailController.text = user.email;
-      fullNameController.text = '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
+      fullNameController.text = user.name ?? '';
     }
   }
 
@@ -54,12 +48,7 @@ class ProfileController extends GetxController {
 
       final response = await ApiService.updateProfile(
         token: authController.accessToken.value,
-        firstName: firstNameController.text.trim().isNotEmpty 
-            ? firstNameController.text.trim() 
-            : null,
-        lastName: lastNameController.text.trim().isNotEmpty 
-            ? lastNameController.text.trim() 
-            : null,
+        name: fullNameController.text,
         imageFile: pickedImage.value,
       );
 
@@ -112,8 +101,6 @@ class ProfileController extends GetxController {
     emailController.dispose();
     phoneController.dispose();
     addressController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
     super.onClose();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -14,7 +15,20 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   final ProfileController controller = Get.find<ProfileController>();
+  final AuthController authController = Get.find<AuthController>();
   DateTime? selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize selectedDate from user's birth date
+    final user = authController.currentUser.value;
+    if (user?.birthDate != null) {
+      selectedDate = user!.birthDate;
+    }
+    // Ensure user data is loaded into controllers
+    controller.loadUserData();
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -104,45 +118,15 @@ class _EditProfileState extends State<EditProfile> {
             
             // First Name
             Text(
-              'First Name',
+              'Full Name',
               style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 8.h),
             TextFormField(
               style: AppStyles.bodySmall,
-              controller: controller.firstNameController,
+              controller: controller.fullNameController,
               decoration: InputDecoration(
-                hintText: 'Enter your first name...',
-                hintStyle: TextStyle(color: AppStyles.hintTextColor),
-                filled: true,
-                fillColor: AppStyles.cardColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: AppStyles.borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: AppStyles.primaryColor),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            
-            // Last Name
-            Text(
-              'Last Name',
-              style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
-            ),
-            SizedBox(height: 8.h),
-            TextFormField(
-              style: AppStyles.bodySmall,
-              controller: controller.lastNameController,
-              decoration: InputDecoration(
-                hintText: 'Enter your last name...',
+                hintText: 'Enter your full name...',
                 hintStyle: TextStyle(color: AppStyles.hintTextColor),
                 filled: true,
                 fillColor: AppStyles.cardColor,

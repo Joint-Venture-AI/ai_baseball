@@ -307,7 +307,7 @@ class ApiService {
 
   static Future<ApiResponse<User>> updateProfile({
     required String token,
-    String? firstName,
+    String? name,
     String? lastName,
     File? imageFile,
   }) async {
@@ -319,8 +319,7 @@ class ApiService {
       
       // Prepare the data object
       Map<String, dynamic> dataObject = {};
-      if (firstName != null) dataObject['firstName'] = firstName;
-      if (lastName != null) dataObject['lastName'] = lastName;
+      if (name != null) dataObject['name'] = name;
       
       // Add the data field as JSON string
       if (dataObject.isNotEmpty) {

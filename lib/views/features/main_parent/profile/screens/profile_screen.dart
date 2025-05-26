@@ -174,14 +174,22 @@ class ProfileScreen extends StatelessWidget {
       );
     });
   }
-
   /// Builds the user's name and email display section.
   Widget _buildUserInfo() {
     return Obx(() {
       final user = authController.currentUser.value;
-      final fullName = user != null 
-          ? '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim()
-          : 'John David';
+      String fullName = 'John David'; // Default fallback
+      
+      if (user != null) {
+        // If firstName and lastName are available, use them
+        if (user.firstName != null && user.lastName != null) {
+          fullName = '${user.firstName!} ${user.lastName!}'.trim();
+        } else {
+          // Use the name field directly if available
+          fullName = user.name.isNotEmpty ? user.name : 'User';
+        }
+      }
+      
       final email = user?.email ?? 'john@gmail.com';
       
       return Column(

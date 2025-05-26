@@ -2,6 +2,7 @@ import 'dart:io'; // Import for File type
 
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
+import 'package:baseball_ai/core/utils/image_utils.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/screens/edit_profile.dart';
@@ -133,7 +134,7 @@ class ProfileScreen extends StatelessWidget {
                       )
                     : user?.image != null && user!.image!.isNotEmpty
                         ? Image.network(
-                            user.image!,
+                           ImageUtils.getProfileImageUrl(user.image!),
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Image.asset(

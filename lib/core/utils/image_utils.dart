@@ -1,196 +1,103 @@
 import 'package:baseball_ai/core/utils/const/api_constants.dart';
-import 'package:flutter/material.dart';
-import 'package:baseball_ai/core/utils/const/app_images.dart'; // For AppImages.avatarLogo
+import 'package:baseball_ai/core/utils/const/app_images.dart';
 
-class ImageUtils {
-  // Fallback image if no specific default is provided
-  static final String _defaultFallbackImage = AppImages.avatarLogo;
-
-  static String _getImageBaseUrl() {
-    // Remove /api/v1 from the base URL for image serving
-    String baseUrl = ApiConstants.baseUrl;
-    if (baseUrl.endsWith('/api/v1')) {
-      baseUrl = baseUrl.substring(0, baseUrl.length - '/api/v1'.length);
-    }
-    // Ensure it doesn't have a trailing slash if it's not just the domain
-    if (baseUrl.contains('/') && baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
-    }
-    return baseUrl;
-  }
-
+class ImageUtils {  /// Converts any image path/URL to a proper full URL or returns a default image
+  /// 
+  /// Handles these cases:
+  /// - Full URL (https://example.com/image.jpg) -> returns as is
+  /// - Relative path (uploads/image.jpg) -> adds base URL
+  /// - Path with leading slash (/images/scaled_image.webp) -> adds base URL
+  /// - Just filename (image.jpg) -> adds base URL
+  /// - null or empty -> returns default image
+  /// - invalid URL -> returns default image
   static String getValidImageUrl(String? imageUrl, {String? defaultImage}) {
-    final String fallbackImage = defaultImage ?? _defaultFallbackImage;
-
+    // Use provided default or app default
+    final fallbackImage = defaultImage ?? AppImages.avatarLogo;
+    
+    // Handle null or empty cases
     if (imageUrl == null || imageUrl.trim().isEmpty) {
       return fallbackImage;
     }
-
-    String trimmedUrl = imageUrl.trim();
-
-    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
-      // Full URL, use as-is
-      return trimmedUrl;
-    } else if (trimmedUrl.startsWith('www.')) {
-      // Starts with www. but no scheme, prepend https
-      return 'https://\$trimmedUrl';
-    } else {
-      // Relative path or just filename
-      _getImageBaseUrl();
-      if (trimmedUrl.startsWith('/')) {
-        // Path starts with a slash, e.g. /uploads/image.jpg
-        return '\$imageBaseUrl\$trimmedUrl';
+    
+    final trimmedUrl = imageUrl.trim();
+    
+    try {
+      // Check if it's already a full URL (starts with http or https)
+      if (trimmedUrl.toLowerCase().startsWith('http://') || 
+          trimmedUrl.toLowerCase().startsWith('https://')) {
+        return trimmedUrl;
       }
-      // Path does not start with a slash, e.g. uploads/image.jpg or image.jpg
-      return '\$imageBaseUrl/\$trimmedUrl';
+      
+      // For relative paths, construct full URL with base URL
+      String baseUrl = ApiConstants.baseUrl;
+      
+      // Remove '/api/v1' from base URL for image serving
+      // Images are typically served from the root domain, not the API path
+      if (baseUrl.endsWith('/api/v1')) {
+        baseUrl = baseUrl.substring(0, baseUrl.length - 7);
+      }
+      
+      // Ensure base URL doesn't end with slash
+      if (baseUrl.endsWith('/')) {
+        baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+      }
+      
+      // Handle paths that start with '/' or don't
+      String cleanPath = trimmedUrl.startsWith('/') 
+          ? trimmedUrl  // Keep the leading slash for absolute paths
+          : '/$trimmedUrl'; // Add leading slash for relative paths
+      
+      return '$baseUrl$cleanPath';
+      
+    } catch (e) {
+      // If any error occurs during URL construction, return fallback
+      return fallbackImage;
     }
   }
-
+  
+  /// Get profile image URL specifically for user profiles
   static String getProfileImageUrl(String? imageUrl) {
     return getValidImageUrl(imageUrl, defaultImage: AppImages.avatarLogo);
   }
-
+  
+  /// Check if the URL is a valid image URL
   static bool isValidImageUrl(String? url) {
-    if (url == null || url.trim().isEmpty) {
-      return false;
-    }
-    // Basic check, can be expanded (e.g., regex for common image extensions)
-    // For now, if it's not empty and getValidImageUrl doesn't return a fallback, it's considered potentially valid.
-    // This doesn't check if the URL actually leads to a valid image resource.
-    String validatedUrl = getValidImageUrl(url);
-    return validatedUrl != AppImages.avatarLogo && validatedUrl != _defaultFallbackImage;
-  }
-}
-
-class SafeNetworkImage extends StatelessWidget {
-  final String? imageUrl;
-  final double? width;
-  final double? height;
-  final BoxFit fit;
-  final bool isCircular;
-  final Color? backgroundColor;
-  final BorderRadius? borderRadius;
-  final String? fallbackAssetImage;
-
-  const SafeNetworkImage({
-    super.key,
-    required this.imageUrl,
-    this.width,
-    this.height,
-    this.fit = BoxFit.cover,
-    this.isCircular = false,
-    this.backgroundColor,
-    this.borderRadius,
-    this.fallbackAssetImage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final String validUrl = ImageUtils.getValidImageUrl(imageUrl, defaultImage: fallbackAssetImage ?? AppImages.avatarLogo);
+    if (url == null || url.trim().isEmpty) return false;
     
-    Widget imageWidget;
-
-    if (validUrl.startsWith('http')) {
-      imageWidget = Image.network(
-        validUrl,
-        width: width,
-        height: height,
-        fit: fit,
-        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            width: width,
-            height: height,
-            color: backgroundColor ?? Colors.grey[300],
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            ),
-          );
-        },
-        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-          return Container(
-            width: width,
-            height: height,
-            color: backgroundColor ?? Colors.grey[300],
-            child: Icon(Icons.broken_image, color: Colors.grey[600]),
-          );
-        },
-      );
-    } else { // Assumes it's an asset path if not http/https
-      imageWidget = Image.asset(
-        validUrl, // This will be the fallback asset image
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-           // If even the fallback asset fails, show a broken image icon
-          return Container(
-            width: width,
-            height: height,
-            color: backgroundColor ?? Colors.grey[300],
-            child: Icon(Icons.broken_image, color: Colors.grey[600]),
-          );
-        },
-      );
+    final trimmedUrl = url.trim().toLowerCase();
+    
+    // Check if it's a URL
+    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+      return true;
     }
-
-    if (isCircular) {
-      return ClipOval(
-        child: imageWidget,
-      );
-    } else if (borderRadius != null) {
-      return ClipRRect(
-        borderRadius: borderRadius!,
-        child: imageWidget,
-      );
+    
+    // Check if it's a relative path with image extension
+    final imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+    return imageExtensions.any((ext) => trimmedUrl.endsWith(ext));
+  }
+  
+  /// Get image URL for different contexts (profile, gallery, etc.)
+  static String getContextualImageUrl(String? imageUrl, ImageContext context) {
+    String defaultImage;
+    
+    switch (context) {
+      case ImageContext.profile:
+        defaultImage = AppImages.avatarLogo;
+        break;
+      case ImageContext.gallery:
+        defaultImage = AppImages.avatarLogo; // You can add a gallery placeholder
+        break;
+      case ImageContext.thumbnail:
+        defaultImage = AppImages.avatarLogo; // You can add a thumbnail placeholder
+        break;
     }
-    return imageWidget;
+    
+    return getValidImageUrl(imageUrl, defaultImage: defaultImage);
   }
 }
 
-class ProfileImage extends StatelessWidget {
-  final String? imageUrl;
-  final double radius;
-  final Color? backgroundColor;
-  final Color? borderColor;
-  final double borderWidth;
-  final String? fallbackAssetImage;
-
-  const ProfileImage({
-    super.key,
-    required this.imageUrl,
-    this.radius = 25.0,
-    this.backgroundColor,
-    this.borderColor,
-    this.borderWidth = 0.0,
-    this.fallbackAssetImage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final String fallbackImage = fallbackAssetImage ?? AppImages.avatarLogo;
-    return Container(
-      width: radius * 2,
-      height: radius * 2,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: borderColor != null && borderWidth > 0
-            ? Border.all(color: borderColor!, width: borderWidth)
-            : null,
-      ),
-      child: SafeNetworkImage(
-        imageUrl: imageUrl,
-        width: radius * 2,
-        height: radius * 2,
-        fit: BoxFit.cover,
-        isCircular: true,
-        backgroundColor: backgroundColor ?? Colors.grey[300],
-        fallbackAssetImage: fallbackImage,
-      ),
-    );
-  }
+enum ImageContext {
+  profile,
+  gallery,
+  thumbnail,
 }

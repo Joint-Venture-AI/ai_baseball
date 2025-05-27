@@ -1,6 +1,7 @@
 import 'package:baseball_ai/core/utils/const/app_route.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
 import 'package:baseball_ai/views/features/boarding/screens/welcome_screen.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 // Remove unused imports if you are removing the multi-step boarding:
 // import 'package:baseball_ai/views/features/boarding/screens/welcome_screen.dart';
 // import 'package:baseball_ai/views/features/main_parent/bottom_nav/main_parent_screen.dart';
@@ -53,8 +54,28 @@ class BoardingController extends GetxController {
     // Wait for the initial loading period
     await Future.delayed(const Duration(seconds: 3));
 
-    // Show the privacy dialog instead of toggling isShowLoadingSection directly
-    showPrivacyDialog();
+    // Check if user is already authenticated
+    try {
+      // Try to get the AuthController, if it doesn't exist, initialize it
+      AuthController authController;
+      if (Get.isRegistered<AuthController>()) {
+        authController = Get.find<AuthController>();
+      } else {
+        authController = Get.put(AuthController(), permanent: true);
+      }
+      
+      if (authController.isLoggedIn) {
+        // User is already logged in, navigate directly to main screen
+        Get.offAllNamed(AppRoute.main);
+      } else {
+        // User is not logged in, show the privacy dialog
+        showPrivacyDialog();
+      }
+    } catch (e) {
+      // If there's any error with auth checking, default to showing privacy dialog
+      print('Error checking authentication: $e');
+      showPrivacyDialog();
+    }
   }
 
   // Method to display the dialog matching the image

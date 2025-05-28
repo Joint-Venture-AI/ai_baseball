@@ -266,7 +266,9 @@ class _DailyShortScreenState extends State<DailyShortScreen> {
           height: 40.h,
           child: MyTextButton(
             buttonText: 'Submit',
-            onTap: () {},
+            onTap: () {
+              
+            },
             isOutline: false,
           ),
         ),

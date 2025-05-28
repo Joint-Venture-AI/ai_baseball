@@ -1,9 +1,10 @@
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Required for input formatters
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+
+import '../../notification_screen.dart';
+import '../controller/throwing_journal_controller.dart';
 
 // Assuming AppStyles exists in your project like this:
 class AppStyles {
@@ -55,44 +56,14 @@ class AppStyles {
   );
 }
 
-// Enum for the radio button choices
-enum WorkloadEnvironment { controlled, inGame }
-
-class HomeThrowingJournalScreen extends StatefulWidget {
+class HomeThrowingJournalScreen extends StatelessWidget {
   const HomeThrowingJournalScreen({super.key});
 
   @override
-  State<HomeThrowingJournalScreen> createState() =>
-      _HomeThrowingJournalScreenState();
-}
-
-class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
-  // Text Editing Controllers
-  final _drillsController = TextEditingController();
-  final _toolsController = TextEditingController();
-  final _setsRepsController = TextEditingController();
-  final _longTossDistController = TextEditingController();
-  final _pitchCountController = TextEditingController();
-  final _focusController = TextEditingController();
-
-  // Radio Button State
-  WorkloadEnvironment? _selectedEnvironment =
-      WorkloadEnvironment.controlled; // Default selection
-
-  @override
-  void dispose() {
-    // Dispose controllers
-    _drillsController.dispose();
-    _toolsController.dispose();
-    _setsRepsController.dispose();
-    _longTossDistController.dispose();
-    _pitchCountController.dispose();
-    _focusController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller
+    final ThrowingJournalController controller = Get.put(ThrowingJournalController());
+
     return Scaffold(
       backgroundColor: AppStyles.backgroundColor,
       appBar: AppBar(
@@ -119,7 +90,7 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
             ),
             onPressed: () {
               // Handle notification tap
-              Get.to(NotificationScreen());
+              Get.to(() => NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding
@@ -137,70 +108,22 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
             SizedBox(height: 25.h),
 
             // --- What drills ---
-            _buildTextFieldSection(
-              label: 'What drills did you do today?',
-              controller: _drillsController,
-              hint: 'List the drills you performed...',
-              maxLines: 4,
-              keyboardType: TextInputType.multiline,
-            ),
+            _buildTextFieldSectionFromConfig(controller.getDrillsFieldConfig()),
 
             // --- Training tools ---
-            _buildTextFieldSection(
-              label:
-                  '"Did you use any training tools or instruments today?\nExamples such as: plyo balls, Tidaltank, towel drills, Core Velocity Belt, etc-T"',
-              controller: _toolsController,
-              hint:
-                  'Describe any tool or requipment used...', // Typo "requipment" kept from image
-              maxLines: 4,
-              keyboardType: TextInputType.multiline,
-            ),
+            _buildTextFieldSectionFromConfig(controller.getToolsFieldConfig()),
 
             // --- Sets and Reps ---
-            _buildTextFieldSection(
-              label:
-                  'How many sets and reps did you perform for each exercise or drill?',
-              controller: _setsRepsController,
-              hint: 'Details of your sets and reps...',
-              maxLines: 3,
-              keyboardType: TextInputType.multiline,
-            ),
+            _buildTextFieldSectionFromConfig(controller.getSetsRepsFieldConfig()),
 
             // --- Long Toss Distance ---
-            _buildTextFieldSection(
-              label: 'If you long-tossed, how far did you throw? (in feet)',
-              controller: _longTossDistController,
-              hint: 'e.g., 120',
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ], // Allow only numbers
-              suffixIcon:
-                  Icons.access_time, // As per image, though maybe not logical
-            ),
+            _buildTextFieldSectionFromConfig(controller.getLongTossFieldConfig()),
 
             // --- Pitch Count ---
-            _buildTextFieldSection(
-              label:
-                  'If you threw off the mound today, how many pitches did you throw in your bullpen or in game today?',
-              controller: _pitchCountController,
-              hint: 'e.g., 120',
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ], // Allow only numbers
-              suffixIcon: Icons.access_time, // As per image
-            ),
+            _buildTextFieldSectionFromConfig(controller.getPitchCountFieldConfig()),
 
             // --- Focus ---
-            _buildTextFieldSection(
-              label: 'What was your focus?',
-              controller: _focusController,
-              hint:
-                  'Describe what you focused on today...', // Quote marks included as per image hint
-              maxLines: 3,
-              keyboardType: TextInputType.multiline,
-            ),
+            _buildTextFieldSectionFromConfig(controller.getFocusFieldConfig()),
 
             // --- Workload Environment ---
             Text(
@@ -208,19 +131,21 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
               style: AppStyles.smallLabelText, // Smaller label style
             ),
             SizedBox(height: 10.h),
-            Row(
+            Obx(() => Row(
               children: [
                 _buildRadioButton(
-                  title: 'Controlled(Bullpen/ Practice)',
+                  controller: controller,
+                  title: controller.getEnvironmentText(WorkloadEnvironment.controlled),
                   value: WorkloadEnvironment.controlled,
                 ),
                 SizedBox(width: 20.w), // Space between radio buttons
                 _buildRadioButton(
-                  title: 'In Game',
+                  controller: controller,
+                  title: controller.getEnvironmentText(WorkloadEnvironment.inGame),
                   value: WorkloadEnvironment.inGame,
                 ),
               ],
-            ),
+            )),
 
             SizedBox(height: 40.h), // Space before button
           ],
@@ -229,7 +154,7 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
       // --- Submit Button (Fixed at Bottom) ---
       bottomNavigationBar: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        child: ElevatedButton(
+        child: Obx(() => ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppStyles.primaryColor,
             foregroundColor: Colors.black, // Text color
@@ -238,50 +163,38 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
               borderRadius: BorderRadius.circular(25.r), // Rounded corners
             ),
           ),
-          onPressed: () {
-            // Handle submission
-            print('Drills: ${_drillsController.text}');
-            print('Tools: ${_toolsController.text}');
-            print('Sets/Reps: ${_setsRepsController.text}');
-            print('Long Toss: ${_longTossDistController.text}');
-            print('Pitch Count: ${_pitchCountController.text}');
-            print('Focus: ${_focusController.text}');
-            print('Environment: ${_selectedEnvironment?.toString()}');
-          },
-          child: const Text('Submit', style: AppStyles.buttonTextStyle),
-        ),
+          onPressed: controller.isSubmitting.value
+              ? null
+              : () => controller.submitThrowingJournal(),
+          child: Text(
+            controller.isSubmitting.value ? 'Submitting...' : 'Submit',
+            style: AppStyles.buttonTextStyle,
+          ),
+        )),
       ),
     );
   }
 
-  // --- Helper Widget for Text Field Sections ---
-  Widget _buildTextFieldSection({
-    required String label,
-    required TextEditingController controller,
-    required String hint,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-    List<TextInputFormatter>? inputFormatters,
-    IconData? suffixIcon,
-  }) {
+  // --- Helper Widget for Text Field Sections from Config ---
+  Widget _buildTextFieldSectionFromConfig(Map<String, dynamic> config) {
     return Padding(
       padding: EdgeInsets.only(bottom: 25.h), // Space below each section
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
+            config['label'],
             style: AppStyles.smallLabelText,
           ), // Use smaller label style
           SizedBox(height: 10.h),
           TextField(
-            controller: controller,
-            maxLines: maxLines,
+            controller: config['controller'],
+            maxLines: config['maxLines'] ?? 1,
             style: AppStyles.bodyText,
-            keyboardType: keyboardType,
-            inputFormatters: inputFormatters,
+            keyboardType: config['keyboardType'] ?? TextInputType.text,
+            inputFormatters: config['inputFormatters'],
             decoration: InputDecoration(
-              hintText: hint,
+              hintText: config['hint'],
               hintStyle: AppStyles.hintStyle,
               filled: true,
               fillColor: AppStyles.cardColor, // Input background
@@ -301,10 +214,9 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
                   color: AppStyles.primaryColor,
                 ), // Focused border
               ),
-              suffixIcon:
-                  suffixIcon != null
-                      ? Icon(suffixIcon, color: AppStyles.hintColor, size: 20)
-                      : null,
+              suffixIcon: config['suffixIcon'] != null
+                  ? Icon(config['suffixIcon'], color: AppStyles.hintColor, size: 20)
+                  : null,
             ),
           ),
         ],
@@ -314,27 +226,20 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
 
   // --- Helper Widget for Radio Button ---
   Widget _buildRadioButton({
+    required ThrowingJournalController controller,
     required String title,
     required WorkloadEnvironment value,
   }) {
     return GestureDetector(
       // Make the text tappable as well
-      onTap: () {
-        setState(() {
-          _selectedEnvironment = value;
-        });
-      },
+      onTap: () => controller.updateEnvironment(value),
       child: Row(
         mainAxisSize: MainAxisSize.min, // Keep row tight
         children: [
           Radio<WorkloadEnvironment>(
             value: value,
-            groupValue: _selectedEnvironment,
-            onChanged: (WorkloadEnvironment? newValue) {
-              setState(() {
-                _selectedEnvironment = newValue;
-              });
-            },
+            groupValue: controller.selectedEnvironment.value,
+            onChanged: controller.updateEnvironment,
             activeColor: AppStyles.radioActiveColor,
             fillColor: MaterialStateProperty.resolveWith<Color>((states) {
               if (states.contains(MaterialState.selected)) {
@@ -348,7 +253,6 @@ class _HomeThrowingJournalScreenState extends State<HomeThrowingJournalScreen> {
               vertical: -4,
             ), // Make radio smaller
           ),
-          // SizedBox(width: 4.w), // Small space between radio and text
           Text(title, style: AppStyles.bodyText),
         ],
       ),

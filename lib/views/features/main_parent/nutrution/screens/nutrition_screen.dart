@@ -1,10 +1,9 @@
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_short/screens/daily_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/nutrution/controller/nutrution_controller.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
+import 'package:baseball_ai/core/utils/theme/app_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class NutritionScreen extends StatelessWidget {
   NutritionScreen({super.key});
@@ -114,14 +113,17 @@ class NutritionScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                ),
+                  ),                ),
                 SizedBox(height: 15.h),
-                MyTextButton(
-                  buttonText: 'Submit',
-                  onTap: () {},
+                Obx(() => MyTextButton(
+                  buttonText: nutritionController.isSubmitting.value 
+                      ? 'Submitting...' 
+                      : 'Submit',
+                  onTap: nutritionController.isSubmitting.value
+                      ? () {}
+                      : () => nutritionController.submitNutritionData(),
                   isOutline: false,
-                ),
+                )),
 
                 SizedBox(height: 50.h),
               ],

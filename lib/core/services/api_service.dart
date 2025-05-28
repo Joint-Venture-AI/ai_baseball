@@ -6,6 +6,7 @@ import 'package:mime/mime.dart';
 import 'package:baseball_ai/core/utils/const/api_constants.dart';
 import 'package:baseball_ai/core/models/user_model.dart';
 import 'package:baseball_ai/core/models/chat_model.dart';
+import 'package:baseball_ai/core/models/nutrition_model.dart';
 
 class ApiService {
   static Future<ApiResponse<User>> signup(SignupRequest request) async {
@@ -438,6 +439,54 @@ class ApiService {
       return ApiResponse<ChatResponse>(
         success: false,
         message: 'Failed to send message',
+        error: e.toString(),      );
+    }
+  }
+
+  // Nutrition API methods
+  static Future<ApiResponse<NutritionResponse>> submitNutrition({
+    required String token,
+    required NutritionRequest nutritionRequest,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.nutrition}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(nutritionRequest.toJson()),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ApiResponse<NutritionResponse>.fromJson(
+          responseData,
+          (data) => NutritionResponse.fromJson(responseData),
+        );
+      } else {
+        return ApiResponse<NutritionResponse>(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit nutrition data',
+          error: responseData['error'] ?? 'Unknown error occurred',
+        );
+      }
+    } on SocketException {
+      return ApiResponse<NutritionResponse>(
+        success: false,
+        message: 'No internet connection',
+        error: 'Please check your internet connection and try again',
+      );
+    } on FormatException {
+      return ApiResponse<NutritionResponse>(
+        success: false,
+        message: 'Invalid response format',
+        error: 'Server returned invalid data',
+      );
+    } catch (e) {
+      return ApiResponse<NutritionResponse>(
+        success: false,
+        message: 'Failed to submit nutrition data',
         error: e.toString(),
       );
     }

@@ -41,4 +41,38 @@ class AppStyles {
     fontSize: 16,
     fontWeight: FontWeight.bold,
   );
+
+  // Additional styles needed for nutrition screen
+  static final TextStyle labelText = TextStyle(
+    color: textPrimaryColor,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
+
+  static final TextStyle sliderValueText = TextStyle(
+    color: textPrimaryColor,
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+  );
+
+  static final TextStyle headingTitle = TextStyle(
+    color: textPrimaryColor,
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  );
+
+  static final TextStyle bodyText = TextStyle(
+    color: textPrimaryColor,
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+  );
+
+  static Color sliderInactiveColor = Color(0xff6A6A6A);
+  static Color hintColor = Color(0xff999999);
+  static Color textColor = Colors.white;
+
+  // Additional colors for other components
+  static Color checkboxActiveColor = primaryColor;
+  static Color checkboxInactiveColor = Color(0xff6A6A6A);
+  static Color radioActiveColor = primaryColor;
 }

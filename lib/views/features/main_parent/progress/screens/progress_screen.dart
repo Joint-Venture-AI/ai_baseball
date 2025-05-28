@@ -1,5 +1,4 @@
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
-// Ensure the controller exists and has the necessary Rx variables
 import 'package:baseball_ai/views/features/main_parent/progress/controller/progress_controller.dart';
 import 'package:baseball_ai/views/glob_widgets/glob_widget_helper.dart';
 import 'package:baseball_ai/views/glob_widgets/my_button.dart';
@@ -125,13 +124,12 @@ class ProgressScreen extends StatelessWidget {
               Text(
                 'If you pitched in game today, what were the results of the outing? Type ‘skip’ if you don’t want to submit results.',
                 style: AppStyles.bodySmall.copyWith(fontSize: 14.sp),
-              ),
-              SizedBox(height: 10.h), // Spacing above text field
+              ),              SizedBox(height: 10.h), // Spacing above text field
               TextFormField(
                 style: AppStyles.bodySmall,
                 // Set the text color for input
                 cursorColor: AppStyles.primaryColor, // Set cursor color
-                // TODO: Add controller for this TextFormField
+                controller: progressController.resultsController,
                 decoration: InputDecoration(
                   hintText: 'Today\'s results, stats, etc...', // Matches image
                   enabledBorder: OutlineInputBorder(
@@ -159,16 +157,18 @@ class ProgressScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.h), // Spacing between text fields
-              // Primary takeaway section
               Text(
+                   // Primary takeaway section              Text(
                 'What was your primary takeaway from today?',
                 style: AppStyles.bodySmall.copyWith(fontSize: 14.sp),
               ),
+             
               SizedBox(height: 8.h), // Spacing above text field
               TextFormField(
                 style: AppStyles.bodySmall,
                 // Set the text color for input
                 cursorColor: AppStyles.primaryColor, // Set cursor color
+                controller: progressController.takeawayController,
                 maxLines: 4, // Allows multiple lines
 
                 decoration: InputDecoration(
@@ -200,25 +200,22 @@ class ProgressScreen extends StatelessWidget {
               // Removed the Spacer() as it's often not effective in SingleChildScrollView
               // const Spacer(),
 
-              // Submit Button
-              Padding(
-                padding: EdgeInsets.symmetric(
+              // Submit Button     
+                    Padding(padding:EdgeInsets.symmetric(
                   horizontal: 0.w,
                   vertical: 20.h,
                 ), // Adjusted vertical padding
-                child: MyTextButton(
+                child: Obx(() => MyTextButton(
                   isOutline: false,
-                  buttonText: 'Submit',
-                  onTap: () {
-                    // Access controller values like:
-                    // final scale = progressController.todayScale.value;
-                    // final workload = progressController.workloadType.value;
-                    // final results = // Get text from results TextFormField controller
-                    // final takeaway = // Get text from takeaway TextFormField controller
-                    // TODO: Implement submit logic using controller data
-                  },
-                ),
-              ),
+                  buttonText: progressController.isSubmitting.value 
+                      ? 'Submitting...' 
+                      : 'Submit',
+                  onTap: progressController.isSubmitting.value
+                      ? () {}
+                      : () => progressController.submitProgress(),
+                )),)
+              
+              
             ],
           ),
         ),

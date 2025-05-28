@@ -9,9 +9,11 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
     // Profile Endpoints
   static const String getProfile = '/user/getme';
-  static const String updateProfile = '/user';
-    // Chat Endpoints
+  static const String updateProfile = '/user';    // Chat Endpoints
   static const String chatWithBot = '/daily-logs/chat';
+  
+  // Daily Logs Endpoints
+  static const String dailyLogs = '/daily-logs';
   
   // Nutrition Endpoints
   static const String nutrition = '/nutrition';

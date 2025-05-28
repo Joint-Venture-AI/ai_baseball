@@ -7,6 +7,7 @@ import 'package:baseball_ai/core/utils/const/api_constants.dart';
 import 'package:baseball_ai/core/models/user_model.dart';
 import 'package:baseball_ai/core/models/chat_model.dart';
 import 'package:baseball_ai/core/models/nutrition_model.dart';
+import 'package:baseball_ai/core/models/daily_logs_model.dart';
 
 class ApiService {
   static Future<ApiResponse<User>> signup(SignupRequest request) async {
@@ -482,12 +483,57 @@ class ApiService {
         success: false,
         message: 'Invalid response format',
         error: 'Server returned invalid data',
-      );
-    } catch (e) {
+      );    } catch (e) {
       return ApiResponse<NutritionResponse>(
         success: false,
         message: 'Failed to submit nutrition data',
         error: e.toString(),
+      );
+    }
+  }
+
+  // Daily Logs API methods
+  static Future<DailyLogsResponse> submitDailyLogs({
+    required String token,
+    required DailyLogsRequest dailyLogsRequest,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dailyLogs}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(dailyLogsRequest.toJson()),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return DailyLogsResponse(
+          success: true,
+          message: responseData['message'] ?? 'Daily logs submitted successfully',
+          data: responseData['data'],
+        );
+      } else {
+        return DailyLogsResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit daily logs',
+        );
+      }
+    } on SocketException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'No internet connection',
+      );
+    } on FormatException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Invalid response format',
+      );
+    } catch (e) {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Failed to submit daily logs',
       );
     }
   }

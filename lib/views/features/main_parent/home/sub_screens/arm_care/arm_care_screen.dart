@@ -2,7 +2,9 @@ import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notifica
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
+
+import '../../../../../../core/services/api_service.dart';
 
 // Assuming AppStyles exists in your project like this:
 class AppStyles {
@@ -60,7 +62,10 @@ class ArmCareScreen extends StatefulWidget {
 }
 
 class _ArmCareScreenState extends State<ArmCareScreen> {
-  // State maps for checkboxes
+  // Text controller for logging exercises
+  final TextEditingController logExerciseController = TextEditingController();
+
+  // Maps for checkboxes
   Map<String, bool> focusOptions = {
     'Scapular Emphasis': false,
     'Shoulder Emphasis': false,
@@ -89,7 +94,289 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
     'BFR': false,
   };
 
+  // State variables
   bool showLogWidget = false;
+  bool isSubmitting = false;
+
+  @override
+  void dispose() {
+    logExerciseController.dispose();
+    super.dispose();
+  }
+
+  // Toggle checkbox value for focus options
+  void toggleFocusOption(String key) {
+    setState(() {
+      focusOptions[key] = !(focusOptions[key] ?? false);
+    });
+  }
+
+  // Toggle checkbox value for exercise focus options
+  void toggleExerciseFocusOption(String key) {
+    setState(() {
+      exerciseFocusOptions[key] = !(exerciseFocusOptions[key] ?? false);
+    });
+  }
+
+  // Toggle checkbox value for recovery options
+  void toggleRecoveryOption(String key) {
+    setState(() {
+      recoveryOptions[key] = !(recoveryOptions[key] ?? false);
+    });
+  }
+
+  // Toggle log widget visibility
+  void toggleLogWidget() {
+    setState(() {
+      showLogWidget = !showLogWidget;
+    });
+  }
+
+  // Handle "Others" tap for recovery options
+  void handleOthersTap() {
+    final TextEditingController textController = TextEditingController();
+    
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: const Color(0xFF2C2C2C),
+        title: const Text(
+          'Add Custom Recovery Option',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: TextField(
+          controller: textController,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Enter custom recovery option...',
+            hintStyle: TextStyle(color: Colors.grey),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.yellow),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = textController.text.trim();
+              if (value.isNotEmpty) {
+                setState(() {
+                  recoveryOptions[value] = true;
+                });
+                Get.back();
+              }
+            },
+            child: const Text(
+              'Add',
+              style: TextStyle(color: Colors.yellow),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Validate form data
+  bool _validateForm() {
+    // Check if at least one focus option is selected
+    if (!focusOptions.values.any((selected) => selected)) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select at least one focus option',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if at least one exercise focus is selected
+    if (!exerciseFocusOptions.values.any((selected) => selected)) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select at least one exercise focus option',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // Get selected options as lists
+  List<String> getSelectedFocusOptions() {
+    return focusOptions.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+  }
+
+  List<String> getSelectedExerciseFocusOptions() {
+    return exerciseFocusOptions.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+  }
+
+  List<String> getSelectedRecoveryOptions() {
+    return recoveryOptions.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+  }
+
+  // Submit arm care data
+  Future<void> submitArmCare() async {
+    if (!_validateForm()) return;
+
+    try {
+      setState(() {
+        isSubmitting = true;
+      });
+
+      // Check if AuthController is available
+      if (!Get.isRegistered<AuthController>()) {
+        Get.snackbar(
+          'Error',
+          'Authentication not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      final authController = Get.find<AuthController>();
+      
+      // Get current user ID and token
+      final userId = authController.currentUser.value?.id;
+      final token = authController.accessToken.value;
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (token.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Access token not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Create request data
+      final requestData = {
+        'userId': userId,
+        'date': DateTime.now().toIso8601String(),
+        'armCare': {
+          'focusOptions': getSelectedFocusOptions(),
+          'exerciseFocus': getSelectedExerciseFocusOptions(),
+          'recoveryModalities': getSelectedRecoveryOptions(),
+          'loggedExercises': showLogWidget && logExerciseController.text.trim().isNotEmpty
+              ? logExerciseController.text.trim()
+              : null,
+        }
+      };
+
+      // Print for debugging (you can replace this with actual API call)
+      print('Arm Care Data:');
+      print('Focus Options: ${getSelectedFocusOptions()}');
+      print('Exercise Focus: ${getSelectedExerciseFocusOptions()}');
+      print('Recovery Options: ${getSelectedRecoveryOptions()}');
+      print('Logged Exercises: ${logExerciseController.text}');
+      print('Request Data: $requestData');
+
+      // TODO: Replace with actual API call
+      final response = await ApiService.submitArmCare(
+        request: requestData,
+        token: token,
+      );
+
+      // Check if response is successful
+      if (response == null || !response.success) {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to submit arm care data',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+
+
+      // Show success message
+      Get.snackbar(
+        'Success',
+        'Arm care data submitted successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Reset form
+      _resetForm();
+
+      // Navigate back
+      Get.back();
+
+    } catch (e) {
+      // Handle unexpected errors
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        isSubmitting = false;
+      });
+    }
+  }
+
+  // Reset form to default values
+  void _resetForm() {
+    setState(() {
+      // Reset all checkbox options
+      for (String key in focusOptions.keys) {
+        focusOptions[key] = false;
+      }
+      for (String key in exerciseFocusOptions.keys) {
+        exerciseFocusOptions[key] = false;
+      }
+      for (String key in recoveryOptions.keys) {
+        recoveryOptions[key] = false;
+      }
+
+      // Reset text controller and widget visibility
+      logExerciseController.clear();
+      showLogWidget = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +406,7 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
             ),
             onPressed: () {
               // Handle notification tap
-              Get.to(NotificationScreen());
+              Get.to(() => NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding
@@ -140,19 +427,21 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
             _buildCheckboxSection(
               title: "What was your focus for today's arm care?",
               options: focusOptions,
+              onToggle: toggleFocusOption,
             ),
 
             // --- Exercise Focus Section ---
             _buildCheckboxSection(
-              title:
-                  "Was there an isometric, oscillating, or eccentric focus to these exercises?",
+              title: "Was there an isometric, oscillating, or eccentric focus to these exercises?",
               options: exerciseFocusOptions,
+              onToggle: toggleExerciseFocusOption,
             ),
 
             // --- Recovery Modalities Section ---
             _buildCheckboxSection(
               title: "What type of recovery modalities did you perform today?",
               options: recoveryOptions,
+              onToggle: toggleRecoveryOption,
               showOthers: true, // Add the "Others" option here
             ),
 
@@ -173,13 +462,7 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
                     ),
                     elevation: 0, // No shadow
                   ),
-                  onPressed: () {
-                    // Handle Log Exercises tap
-                    setState(() {
-                      showLogWidget = !showLogWidget;
-                    });
-                    print("Log Exercises Tapped");
-                  },
+                  onPressed: toggleLogWidget,
                   child: const Text(
                     'Log Exercises for Future Ref.',
                     style: AppStyles.secondaryButtonTextStyle,
@@ -209,13 +492,11 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
               borderRadius: BorderRadius.circular(25.r), // Rounded corners
             ),
           ),
-          onPressed: () {
-            // Handle submission
-            print('Focus Options: $focusOptions');
-            print('Exercise Focus: $exerciseFocusOptions');
-            print('Recovery Options: $recoveryOptions');
-          },
-          child: const Text('Submit', style: AppStyles.buttonTextStyle),
+          onPressed: isSubmitting ? null : submitArmCare,
+          child: Text(
+            isSubmitting ? 'Submitting...' : 'Submit',
+            style: AppStyles.buttonTextStyle,
+          ),
         ),
       ),
     );
@@ -225,6 +506,7 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
   Widget _buildCheckboxSection({
     required String title,
     required Map<String, bool> options,
+    required Function(String) onToggle,
     bool showOthers = false,
   }) {
     List<String> keys = options.keys.toList();
@@ -258,7 +540,7 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
               }
               // Build regular checkbox item
               String key = keys[index];
-              return _buildCheckboxTile(key, options);
+              return _buildCheckboxTile(key, options, onToggle);
             },
           ),
         ],
@@ -266,26 +548,16 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
     );
   }
 
-  // --- Helper Widget for a single Checkbox Tile ---
-  Widget _buildCheckboxTile(String key, Map<String, bool> optionsMap) {
+  Widget _buildCheckboxTile(String key, Map<String, bool> optionsMap, Function(String) onToggle) {
     return GestureDetector(
-      // Make text tappable
-      onTap: () {
-        setState(() {
-          optionsMap[key] = !(optionsMap[key] ?? false);
-        });
-      },
+      // Make the entire row tappable
+      onTap: () => onToggle(key),
       child: Row(
-        mainAxisSize:
-            MainAxisSize.min, // Prevent row from expanding unnecessarily
+        mainAxisSize: MainAxisSize.min, // Prevent row from expanding unnecessarily
         children: [
           Checkbox(
-            value: optionsMap[key] ?? false,
-            onChanged: (bool? newValue) {
-              setState(() {
-                optionsMap[key] = newValue ?? false;
-              });
-            },
+            value: optionsMap[key] ?? false, // Access the specific key
+            onChanged: (bool? newValue) => onToggle(key),
             activeColor: AppStyles.checkboxActiveColor,
             checkColor: Colors.black, // Color of the checkmark
             side: MaterialStateBorderSide.resolveWith(
@@ -328,10 +600,7 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
   // --- Helper Widget for the "Others" option ---
   Widget _buildOthersOption() {
     return GestureDetector(
-      onTap: () {
-        // Handle "Others" tap - e.g., show a dialog or navigate
-        print("Others Tapped");
-      },
+      onTap: handleOthersTap,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -353,20 +622,27 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
             Text('Log your exercise: ', style: AppStyles.bodyText),
             const Spacer(),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  showLogWidget = !showLogWidget;
-                });
-              },
-              icon: Icon(Icons.cancel, color: Colors.red),
+              onPressed: toggleLogWidget,
+              icon: const Icon(Icons.cancel, color: Colors.red),
             ),
           ],
         ),
         SizedBox(height: 8.h),
         TextField(
+          controller: logExerciseController,
           maxLines: 4,
-          decoration: InputDecoration(
+          style: AppStyles.bodyText,
+          decoration: const InputDecoration(
             hintText: 'List the exercise, and reps you performed today...',
+            hintStyle: AppStyles.hintStyle,
+            filled: true,
+            fillColor: AppStyles.cardColor,
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppStyles.primaryColor),
+            ),
           ),
         ),
       ],

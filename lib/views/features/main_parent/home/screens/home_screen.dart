@@ -2,21 +2,20 @@ import 'package:baseball_ai/core/models/chart_data.dart';
 import 'package:baseball_ai/core/utils/const/app_icons.dart';
 import 'package:baseball_ai/core/utils/const/app_images.dart';
 import 'package:baseball_ai/core/utils/const/app_route.dart';
-import 'package:baseball_ai/core/utils/theme/app_styles.dart';
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/hiting_journal/hiting_journal_screen.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/performance/performance_screen.dart';
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/visualization/screens/visualization_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart'; // Add this dependency
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
 
   // Define colors for easy reuse and modification
   static const Color darkBackground = Color(0xFF1E1E1E); // Adjust as needed
@@ -29,6 +28,7 @@ class HomeScreen extends StatelessWidget {
   static const Color pillarFocusBg = Color(0xFF4A4A4A); // Example color
   static const Color pillarConsistencyBg = Color(0xFF2E7D32); // Example color
   static const Color pillarGritBg = Color(0xFFC62828); // Example color
+  final  authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -258,17 +258,17 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildPillarChip(
-                'Focus',
+               authController.currentUser.value?.threeWordThtDescribeYou.split(',').first ??'Focus',
                 Icons.track_changes,
                 pillarFocusBg,
               ), // Example Icon
               _buildPillarChip(
-                'Consistency',
+               authController.currentUser.value?.threeWordThtDescribeYou.split(',')[1] ?? 'Consistency',
                 Icons.sync_alt,
                 pillarConsistencyBg,
               ), // Example Icon
               _buildPillarChip(
-                'Grit',
+               authController.currentUser.value?.threeWordThtDescribeYou.split(',')[2] ?? 'Grit',
                 Icons.whatshot,
                 pillarGritBg,
               ), // Example Icon

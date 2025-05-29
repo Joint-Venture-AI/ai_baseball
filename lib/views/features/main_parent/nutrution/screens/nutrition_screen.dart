@@ -47,10 +47,18 @@ class NutritionScreen extends StatelessWidget {
                 TextFormField(
                   controller: nutritionController.proteinIntakeController,
                   maxLines: 1,
+                  style: AppStyles.bodyText,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Protein Intake (grams)',
+                    labelStyle: AppStyles.labelText,
                     hintText: 'Enter total grams of protein',
+                    hintStyle: TextStyle(
+                      color: AppStyles.hintColor,
+                      fontSize: 14.sp,
+                      
+                    ),
+                    
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(color: AppStyles.primaryColor),
@@ -83,30 +91,29 @@ class NutritionScreen extends StatelessWidget {
                 SizedBox(height: 10.h),
                 Row(
                   children: [
-                    Radio<String>(
-                      value: 'Yes',
-                      activeColor: AppStyles.primaryColor,
-                      groupValue: nutritionController.recoverNextDay.value,
-                      onChanged: (value) {
-                        if (value != null) {
-                          nutritionController.recoverNextDay.value = value;
-                        }
-                      },
-                    ),
-                    Text('Yes', style: AppStyles.bodyText),
-                    SizedBox(width: 10.w),
-                    Radio<String>(
-                      value: 'No',
-                      activeColor: AppStyles.primaryColor,
-
-                      groupValue: nutritionController.recoverNextDay.value,
-                      onChanged: (value) {
-                        if (value != null) {
-                          nutritionController.recoverNextDay.value = value;
-                        }
-                      },
-                    ),
-                    Text('No', style: AppStyles.bodyText),
+                  Radio<bool>(
+                    value: true,
+                    activeColor: AppStyles.primaryColor,
+                    groupValue: nutritionController.recoverNextDay.value,
+                    onChanged: (value) {
+                    if (value != null) {
+                      nutritionController.recoverNextDay.value = value;
+                    }
+                    },
+                  ),
+                  Text('Yes', style: AppStyles.bodyText),
+                  SizedBox(width: 10.w),
+                  Radio<bool>(
+                    value: false,
+                    activeColor: AppStyles.primaryColor,
+                    groupValue: nutritionController.recoverNextDay.value,
+                    onChanged: (value) {
+                    if (value != null) {
+                      nutritionController.recoverNextDay.value = value;
+                    }
+                    },
+                  ),
+                  Text('No', style: AppStyles.bodyText),
                   ],
                 ),
                 SizedBox(height: 15.h),

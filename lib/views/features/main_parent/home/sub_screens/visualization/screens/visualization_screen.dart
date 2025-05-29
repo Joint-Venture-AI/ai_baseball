@@ -17,19 +17,12 @@ const Color kControlBackgroundColor = Color(0xFF2C2C2E);
 // --- ---
 
 class VisualizationScreen extends StatelessWidget {
-  // Use GetView for easier controller access, or keep StatelessWidget and use Get.find
-  // const VisualizationScreen({super.key}); // Use this if not using GetView
+  final VisualizationController controller = Get.find<VisualizationController>();
 
-  // Access the controller (automatically found if using GetView with binding)
-  final VisualizationController controller =
-      Get.find<VisualizationController>();
-
-  VisualizationScreen({super.key}); // Constructor for StatelessWidget/GetView
+  VisualizationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ScreenUtil.init(context, designSize: const Size(375, 812)); // Init if needed
-
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
@@ -37,7 +30,7 @@ class VisualizationScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: kTextColor, size: 20.sp),
-          onPressed: () => Get.back(), // Use Get.back()
+          onPressed: () => Get.back(),
         ),
         title: Text(
           'Visualization',
@@ -57,7 +50,6 @@ class VisualizationScreen extends StatelessWidget {
             ),
             onPressed: () {
               Get.to(NotificationScreen());
-              /* Handle notification tap */
             },
           ),
           SizedBox(width: 10.w),
@@ -90,7 +82,7 @@ class VisualizationScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  controller.remainingBoxTime, // Get from controller
+                  controller.remainingBoxTime,
                   style: TextStyle(
                     color: kPrimaryYellow,
                     fontSize: 15.sp,
@@ -106,47 +98,81 @@ class VisualizationScreen extends StatelessWidget {
               child: SizedBox(
                 width: 220.sp,
                 height: 220.sp,
-                // Wrap the CustomPaint and its child with Obx
                 child: Obx(
-                  () => CustomPaint(
-                    // Pass progress from controller
-                    painter: CircularTimerPainter(
-                      progress: controller.progress, // Reactive progress
-                      backgroundColor: kControlBackgroundColor,
-                      progressColor: kPrimaryYellow,
-                      strokeWidth: 14.sp,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Display formatted time from controller
-                          Text(
-                            controller.formattedTime, // Reactive time string
-                            style: TextStyle(
-                              color: kTextColor,
-                              fontSize: 48.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  () => Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CustomPaint(
+                        painter: CircularTimerPainter(
+                          progress: controller.progress,
+                          backgroundColor: kControlBackgroundColor,
+                          progressColor: kPrimaryYellow,
+                          strokeWidth: 14.sp,
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                controller.formattedTime,
+                                style: TextStyle(
+                                  color: kTextColor,
+                                  fontSize: 48.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 5.h),
+                              Text(
+                                '${controller.currentSession} of ${controller.totalSessions} sessions',
+                                style: TextStyle(
+                                  color: kSubtitleColor,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 5.h),
-                          Text(
-                            // Use values from controller
-                            '${controller.currentSession} of ${controller.totalSessions} sessions',
-                            style: TextStyle(
-                              color: kSubtitleColor,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      // Show saving overlay when saving
+                      if (controller.isSaving.value)
+                        Container(
+                          width: 220.sp,
+                          height: 220.sp,
+                          decoration: BoxDecoration(
+                            color: kBackgroundColor.withOpacity(0.8),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 30.sp,
+                                  height: 30.sp,
+                                  child: CircularProgressIndicator(
+                                    color: kPrimaryYellow,
+                                    strokeWidth: 3,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                Text(
+                                  controller.savingMessage.value,
+                                  style: TextStyle(
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
             ),
 
-            // --- End Reactive Timer ---
             SizedBox(height: 40.h),
             Container(
               width: double.infinity,
@@ -188,50 +214,43 @@ class VisualizationScreen extends StatelessWidget {
                 children: [
                   _buildControlButton(
                     icon: Icons.refresh,
-                    // Call controller method
                     onPressed: controller.restartTimer,
                   ),
-                  // Wrap Play/Pause button with Obx to change icon
                   Obx(
                     () => _buildControlButton(
-                      // Change icon based on isRunning state
-                      icon:
-                          controller.isRunning.value
-                              ? Icons.pause
-                              : Icons.play_arrow,
-                      // Call controller method
-                      onPressed: controller.togglePlayPause,
+                      icon: controller.isRunning.value ? Icons.pause : Icons.play_arrow,
+                      onPressed: controller.isSaving.value ? () {} : controller.togglePlayPause,
                       isPrimary: true,
+                      isDisabled: controller.isSaving.value,
                     ),
                   ),
                   _buildControlButton(
                     icon: Icons.stop,
-                    // Call controller method
                     onPressed: controller.stopTimer,
                   ),
                 ],
               ),
             ),
-            // --- End Reactive Controls ---
           ],
         ),
       ),
     );
   }
 
-  // Keep the helper widget (no changes needed here)
   Widget _buildControlButton({
     required IconData icon,
     required VoidCallback onPressed,
     bool isPrimary = false,
+    bool isDisabled = false,
   }) {
     final double buttonSize = isPrimary ? 65.sp : 55.sp;
-    final Color backgroundColor =
-        isPrimary ? kPrimaryYellow : kControlBackgroundColor;
+    final Color backgroundColor = isPrimary 
+        ? (isDisabled ? kPrimaryYellow.withOpacity(0.5) : kPrimaryYellow)
+        : kControlBackgroundColor;
     final Color iconColor = isPrimary ? kBackgroundColor : kControlIconColor;
 
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: isDisabled ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: iconColor,

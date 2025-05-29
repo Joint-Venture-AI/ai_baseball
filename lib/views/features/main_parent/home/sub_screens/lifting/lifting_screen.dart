@@ -1,8 +1,8 @@
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 // Assuming AppStyles exists in your project like this:
 class AppStyles {
@@ -66,6 +66,9 @@ class LiftingScreen extends StatefulWidget {
 }
 
 class _LiftingScreenState extends State<LiftingScreen> {
+  // Text controller for logging exercises
+  final TextEditingController logExerciseController = TextEditingController();
+
   // State maps for checkboxes
   Map<String, bool> liftTypeOptions = {
     'Upper Body': false,
@@ -82,7 +85,186 @@ class _LiftingScreenState extends State<LiftingScreen> {
     'Isometric (holding position)': false,
     'Concentric (lifting phase emphasis)': false,
   };
+
   bool showLogWidget = false;
+  bool isSubmitting = false;
+
+  @override
+  void dispose() {
+    logExerciseController.dispose();
+    super.dispose();
+  }
+
+  // Validate form data
+  bool _validateForm() {
+    // Check if at least one lift type is selected
+    if (!liftTypeOptions.values.any((selected) => selected)) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select at least one lift type',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if at least one variable focus is selected
+    if (!variableFocusOptions.values.any((selected) => selected)) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select at least one variable focus option',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // Get selected options as lists
+  List<String> getSelectedLiftTypes() {
+    return liftTypeOptions.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+  }
+
+  List<String> getSelectedVariableFocus() {
+    return variableFocusOptions.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+  }
+
+  // Submit lifting data
+  Future<void> submitLiftingData() async {
+    if (!_validateForm()) return;
+
+    try {
+      setState(() {
+        isSubmitting = true;
+      });
+
+      // Check if AuthController is available
+      if (!Get.isRegistered<AuthController>()) {
+        Get.snackbar(
+          'Error',
+          'Authentication not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      final authController = Get.find<AuthController>();
+      
+      // Get current user ID and token
+      final userId = authController.currentUser.value?.id;
+      final token = authController.accessToken.value;
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (token.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Access token not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Create request data
+      final requestData = {
+        'userId': userId,
+        'date': DateTime.now().toIso8601String(),
+        'lifting': {
+          'liftTypes': getSelectedLiftTypes(),
+          'variableFocus': getSelectedVariableFocus(),
+          'loggedExercises': showLogWidget && logExerciseController.text.trim().isNotEmpty
+              ? logExerciseController.text.trim()
+              : null,
+        }
+      };
+
+      // Print for debugging (you can replace this with actual API call)
+      print('Lifting Data:');
+      print('Lift Types: ${getSelectedLiftTypes()}');
+      print('Variable Focus: ${getSelectedVariableFocus()}');
+      print('Logged Exercises: ${logExerciseController.text}');
+      print('Request Data: $requestData');
+
+      // TODO: Replace with actual API call
+      // final response = await ApiService.submitLiftingData(
+      //   request: requestData,
+      //   token: token,
+      // );
+
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Show success message
+      Get.snackbar(
+        'Success',
+        'Lifting data submitted successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Reset form
+      _resetForm();
+
+      // Navigate back
+      Get.back();
+
+    } catch (e) {
+      // Handle unexpected errors
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        isSubmitting = false;
+      });
+    }
+  }
+
+  // Reset form to default values
+  void _resetForm() {
+    setState(() {
+      // Reset all checkbox options
+      for (String key in liftTypeOptions.keys) {
+        liftTypeOptions[key] = false;
+      }
+      for (String key in variableFocusOptions.keys) {
+        variableFocusOptions[key] = false;
+      }
+
+      // Reset text controller and widget visibility
+      logExerciseController.clear();
+      showLogWidget = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,7 +293,7 @@ class _LiftingScreenState extends State<LiftingScreen> {
             ),
             onPressed: () {
               // Handle notification tap
-              Get.to(NotificationScreen());
+              Get.to(() => NotificationScreen());
             },
           ),
           SizedBox(width: 10.w), // Add some padding
@@ -146,7 +328,6 @@ class _LiftingScreenState extends State<LiftingScreen> {
 
             SizedBox(height: 30.h),
 
-            // --- Log Exercises Button ---
             // --- Log Exercises Button ---
             showLogWidget
                 ? _buildLogWidget()
@@ -197,12 +378,11 @@ class _LiftingScreenState extends State<LiftingScreen> {
               borderRadius: BorderRadius.circular(25.r), // Rounded corners
             ),
           ),
-          onPressed: () {
-            // Handle submission
-            print('Lift Type Options: $liftTypeOptions');
-            print('Variable Focus Options: $variableFocusOptions');
-          },
-          child: const Text('Submit', style: AppStyles.buttonTextStyle),
+          onPressed: isSubmitting ? null : submitLiftingData,
+          child: Text(
+            isSubmitting ? 'Submitting...' : 'Submit',
+            style: AppStyles.buttonTextStyle,
+          ),
         ),
       ),
     );
@@ -324,15 +504,26 @@ class _LiftingScreenState extends State<LiftingScreen> {
                   showLogWidget = !showLogWidget;
                 });
               },
-              icon: Icon(Icons.cancel, color: Colors.red),
+              icon: const Icon(Icons.cancel, color: Colors.red),
             ),
           ],
         ),
         SizedBox(height: 8.h),
         TextField(
+          controller: logExerciseController,
           maxLines: 4,
-          decoration: InputDecoration(
+          style: AppStyles.bodyText,
+          decoration: const InputDecoration(
             hintText: 'List the exercise, and reps you performed today...',
+            hintStyle: AppStyles.hintStyle,
+            filled: true,
+            fillColor: AppStyles.cardColor,
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppStyles.primaryColor),
+            ),
           ),
         ),
       ],

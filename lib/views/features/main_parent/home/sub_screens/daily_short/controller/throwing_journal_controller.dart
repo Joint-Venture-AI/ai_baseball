@@ -142,7 +142,7 @@ class ThrowingJournalController extends GetxController {
           'focus': focusController.text.trim(),
           'environment': selectedEnvironment.value == WorkloadEnvironment.controlled 
               ? 'Controlled' 
-              : 'In Game',
+              : 'InGame',
         }
       };
 
@@ -165,16 +165,19 @@ class ThrowingJournalController extends GetxController {
           colorText: Colors.white,
         );
         return;
+      }else{
+         // Show success message
+        Get.snackbar(
+          'Success',
+          'Throwing journal submitted successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
       }
 
-      // Show success message
-      Get.snackbar(
-        'Success',
-        'Throwing journal submitted successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+     
 
       // Reset form
       _resetForm();

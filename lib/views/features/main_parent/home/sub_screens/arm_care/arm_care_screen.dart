@@ -65,20 +65,23 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
   // Text controller for logging exercises
   final TextEditingController logExerciseController = TextEditingController();
 
-  // Maps for checkboxes
+  // Maps for checkboxes - Updated to match backend validation
   Map<String, bool> focusOptions = {
-    'Scapular Emphasis': false,
-    'Shoulder Emphasis': false,
-    'Forearms': false,
-    'Biceps/Triceps': false,
+    'Scapular': false,           // Backend expects: "Scapular" (not "Scapular Emphasis")
+    'Shoulder': false,           // Backend expects: "Shoulder" (not "Shoulder Emphasis")
+    'Forearms': false,           // ✓ Matches backend
+    'Biceps/Triceps': false,     // ✓ Matches backend
   };
 
-  Map<String, bool> exerciseFocusOptions = {
-    'Isometric': false,
-    'Eccentric': false,
-    'Oscillating': false,
-  };
+  // Backend expects single selection, not array - need to change this to single selection
+  String? selectedExerciseType; // Changed from Map to single selection
+  List<String> exerciseTypeOptions = [
+    'Isometric',    // ✓ Matches backend
+    'Eccentric',    // ✓ Matches backend
+    'Oscillating',  // ✓ Matches backend
+  ];
 
+  // Recovery modalities can remain as array (backend accepts array of strings)
   Map<String, bool> recoveryOptions = {
     'Hot tub': false,
     'Cold Tub': false,
@@ -111,10 +114,10 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
     });
   }
 
-  // Toggle checkbox value for exercise focus options
-  void toggleExerciseFocusOption(String key) {
+  // Handle exercise type selection (single selection)
+  void selectExerciseType(String exerciseType) {
     setState(() {
-      exerciseFocusOptions[key] = !(exerciseFocusOptions[key] ?? false);
+      selectedExerciseType = exerciseType;
     });
   }
 
@@ -199,11 +202,23 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
       return false;
     }
 
-    // Check if at least one exercise focus is selected
-    if (!exerciseFocusOptions.values.any((selected) => selected)) {
+    // Check if exercise type is selected (required by backend)
+    if (selectedExerciseType == null) {
       Get.snackbar(
         'Validation Error',
-        'Please select at least one exercise focus option',
+        'Please select an exercise type',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if exercises log is provided (required by backend)
+    if (logExerciseController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please log your exercises (this field is required)',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -217,13 +232,6 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
   // Get selected options as lists
   List<String> getSelectedFocusOptions() {
     return focusOptions.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-  }
-
-  List<String> getSelectedExerciseFocusOptions() {
-    return exerciseFocusOptions.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
@@ -285,29 +293,27 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
         return;
       }
 
-      // Create request data
+      // Create request data matching backend schema
       final requestData = {
         'userId': userId,
         'date': DateTime.now().toIso8601String(),
         'armCare': {
-          'focusOptions': getSelectedFocusOptions(),
-          'exerciseFocus': getSelectedExerciseFocusOptions(),
-          'recoveryModalities': getSelectedRecoveryOptions(),
-          'loggedExercises': showLogWidget && logExerciseController.text.trim().isNotEmpty
-              ? logExerciseController.text.trim()
-              : null,
+          'focus': getSelectedFocusOptions(),                    // Array of focus areas
+          'exerciseType': selectedExerciseType!,                 // Single exercise type (required)
+          'recoveryModalities': getSelectedRecoveryOptions(),     // Array of recovery methods
+          'exercisesLog': logExerciseController.text.trim(),     // Required string
         }
       };
 
-      // Print for debugging (you can replace this with actual API call)
+      // Print for debugging
       print('Arm Care Data:');
       print('Focus Options: ${getSelectedFocusOptions()}');
-      print('Exercise Focus: ${getSelectedExerciseFocusOptions()}');
+      print('Exercise Type: $selectedExerciseType');
       print('Recovery Options: ${getSelectedRecoveryOptions()}');
-      print('Logged Exercises: ${logExerciseController.text}');
+      print('Exercises Log: ${logExerciseController.text.trim()}');
       print('Request Data: $requestData');
 
-      // TODO: Replace with actual API call
+      // Call API
       final response = await ApiService.submitArmCare(
         request: requestData,
         token: token,
@@ -323,19 +329,20 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
           colorText: Colors.white,
         );
         return;
+      }else{
+        print('Arm care data submitted successfully: ${response.message}');
+         // Show success message
+        Get.snackbar(
+          'Success',
+          'Arm care data submitted successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
       }
 
-
-
-      // Show success message
-      Get.snackbar(
-        'Success',
-        'Arm care data submitted successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-
+     
       // Reset form
       _resetForm();
 
@@ -365,14 +372,12 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
       for (String key in focusOptions.keys) {
         focusOptions[key] = false;
       }
-      for (String key in exerciseFocusOptions.keys) {
-        exerciseFocusOptions[key] = false;
-      }
       for (String key in recoveryOptions.keys) {
         recoveryOptions[key] = false;
       }
 
-      // Reset text controller and widget visibility
+      // Reset single selection and text controller
+      selectedExerciseType = null;
       logExerciseController.clear();
       showLogWidget = false;
     });
@@ -395,21 +400,20 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3), // Circle background
+                color: Colors.grey.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.notifications_none_outlined, // Or Icons.notifications
+                Icons.notifications_none_outlined,
                 color: AppStyles.textColor,
-                size: 24, // Adjust size
+                size: 24,
               ),
             ),
             onPressed: () {
-              // Handle notification tap
               Get.to(() => NotificationScreen());
             },
           ),
-          SizedBox(width: 10.w), // Add some padding
+          SizedBox(width: 10.w),
         ],
       ),
       body: SingleChildScrollView(
@@ -430,48 +434,23 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
               onToggle: toggleFocusOption,
             ),
 
-            // --- Exercise Focus Section ---
-            _buildCheckboxSection(
-              title: "Was there an isometric, oscillating, or eccentric focus to these exercises?",
-              options: exerciseFocusOptions,
-              onToggle: toggleExerciseFocusOption,
-            ),
+            // --- Exercise Type Section (Single Selection) ---
+            _buildExerciseTypeSection(),
 
             // --- Recovery Modalities Section ---
             _buildCheckboxSection(
               title: "What type of recovery modalities did you perform today?",
               options: recoveryOptions,
               onToggle: toggleRecoveryOption,
-              showOthers: true, // Add the "Others" option here
+              showOthers: true,
             ),
 
             SizedBox(height: 10.h),
 
-            // --- Log Exercises Button ---
-            showLogWidget
-                ? _buildLogWidget()
-                : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppStyles.cardColor, // Darker background
-                    foregroundColor: AppStyles.primaryColor, // Yellow text
-                    minimumSize: Size(double.infinity, 50.h), // Full width
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        25.r,
-                      ), // Rounded corners
-                    ),
-                    elevation: 0, // No shadow
-                  ),
-                  onPressed: toggleLogWidget,
-                  child: const Text(
-                    'Log Exercises for Future Ref.',
-                    style: AppStyles.secondaryButtonTextStyle,
-                  ),
-                ),
+            // --- Log Exercises Section (Required) ---
+            _buildLogWidget(),
 
-            SizedBox(
-              height: 20.h,
-            ), // Space before the final submit button if needed
+            SizedBox(height: 20.h),
           ],
         ),
       ),
@@ -482,14 +461,14 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
           right: 20.w,
           bottom: 20.h,
           top: 10.h,
-        ), // Adjust padding
+        ),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppStyles.primaryColor,
-            foregroundColor: Colors.black, // Text color
-            minimumSize: Size(double.infinity, 50.h), // Full width
+            foregroundColor: Colors.black,
+            minimumSize: Size(double.infinity, 50.h),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.r), // Rounded corners
+              borderRadius: BorderRadius.circular(25.r),
             ),
           ),
           onPressed: isSubmitting ? null : submitArmCare,
@@ -498,6 +477,68 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
             style: AppStyles.buttonTextStyle,
           ),
         ),
+      ),
+    );
+  }
+
+  // --- Exercise Type Section (Single Selection) ---
+  Widget _buildExerciseTypeSection() {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 25.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Was there an isometric, oscillating, or eccentric focus to these exercises?",
+            style: AppStyles.labelText,
+          ),
+          SizedBox(height: 15.h),
+          GridView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 4 / 1,
+              crossAxisSpacing: 10.w,
+              mainAxisSpacing: 10.h,
+            ),
+            itemCount: exerciseTypeOptions.length,
+            itemBuilder: (context, index) {
+              String option = exerciseTypeOptions[index];
+              return _buildRadioTile(option);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Radio button tile for single selection
+  Widget _buildRadioTile(String option) {
+    return GestureDetector(
+      onTap: () => selectExerciseType(option),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<String>(
+            value: option,
+            groupValue: selectedExerciseType,
+            onChanged: (String? value) => selectExerciseType(value!),
+            activeColor: AppStyles.checkboxActiveColor,
+            visualDensity: const VisualDensity(
+              horizontal: -4,
+              vertical: -4,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              option,
+              style: AppStyles.bodyText,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -519,26 +560,20 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
           Text(title, style: AppStyles.labelText),
           SizedBox(height: 15.h),
           GridView.builder(
-            padding: EdgeInsets.zero, // Remove default GridView padding
-            shrinkWrap: true, // Important for GridView inside Column/ScrollView
-            physics:
-                const NeverScrollableScrollPhysics(), // Disable GridView scrolling
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Two columns
-              childAspectRatio:
-                  4 / 1, // Adjust aspect ratio (width/height) for item size
-              crossAxisSpacing: 10.w, // Horizontal spacing
-              mainAxisSpacing: 10.h, // Vertical spacing
+              crossAxisCount: 2,
+              childAspectRatio: 4 / 1,
+              crossAxisSpacing: 10.w,
+              mainAxisSpacing: 10.h,
             ),
-            itemCount:
-                keys.length +
-                (showOthers ? 1 : 0), // Add 1 for "Others" if needed
+            itemCount: keys.length + (showOthers ? 1 : 0),
             itemBuilder: (context, index) {
               if (showOthers && index == keys.length) {
-                // Build the "Others" item
                 return _buildOthersOption();
               }
-              // Build regular checkbox item
               String key = keys[index];
               return _buildCheckboxTile(key, options, onToggle);
             },
@@ -550,18 +585,16 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
 
   Widget _buildCheckboxTile(String key, Map<String, bool> optionsMap, Function(String) onToggle) {
     return GestureDetector(
-      // Make the entire row tappable
       onTap: () => onToggle(key),
       child: Row(
-        mainAxisSize: MainAxisSize.min, // Prevent row from expanding unnecessarily
+        mainAxisSize: MainAxisSize.min,
         children: [
           Checkbox(
-            value: optionsMap[key] ?? false, // Access the specific key
+            value: optionsMap[key] ?? false,
             onChanged: (bool? newValue) => onToggle(key),
             activeColor: AppStyles.checkboxActiveColor,
-            checkColor: Colors.black, // Color of the checkmark
+            checkColor: Colors.black,
             side: MaterialStateBorderSide.resolveWith(
-              // Border style
               (states) {
                 if (states.contains(MaterialState.selected)) {
                   return const BorderSide(
@@ -578,18 +611,16 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
             visualDensity: const VisualDensity(
               horizontal: -4,
               vertical: -4,
-            ), // Compact size
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
-            ), // Slightly rounded square
+            ),
           ),
-          // SizedBox(width: 4.w), // Optional small space
           Flexible(
-            // Allow text to wrap if needed, though unlikely with aspect ratio
             child: Text(
               key,
               style: AppStyles.bodyText,
-              overflow: TextOverflow.ellipsis, // Prevent overflow issues
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -604,7 +635,6 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Add padding to align with checkbox visually
           SizedBox(width: 12.w),
           Icon(Icons.add, color: AppStyles.textColor, size: 20.sp),
           SizedBox(width: 8.w),
@@ -616,24 +646,21 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
 
   Widget _buildLogWidget() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text('Log your exercise: ', style: AppStyles.bodyText),
-            const Spacer(),
-            IconButton(
-              onPressed: toggleLogWidget,
-              icon: const Icon(Icons.cancel, color: Colors.red),
-            ),
-          ],
+        Text(
+          'Log your exercises (Required)',
+          style: AppStyles.labelText.copyWith(
+            color: AppStyles.primaryColor, // Highlight required field
+          ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 10.h),
         TextField(
           controller: logExerciseController,
           maxLines: 4,
           style: AppStyles.bodyText,
           decoration: const InputDecoration(
-            hintText: 'List the exercise, and reps you performed today...',
+            hintText: 'List the exercises and reps you performed today...',
             hintStyle: AppStyles.hintStyle,
             filled: true,
             fillColor: AppStyles.cardColor,

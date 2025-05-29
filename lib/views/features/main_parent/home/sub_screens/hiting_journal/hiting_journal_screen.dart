@@ -1,7 +1,8 @@
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart'; // Assuming this path is correct
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/notification_screen.dart';
+import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart'; // Assuming GetX is used
+import 'package:get/get.dart';
 
 // Assuming AppStyles exists in your project and contains the necessary definitions:
 class AppStyles {
@@ -62,20 +63,23 @@ class HittingJournalScreen extends StatefulWidget {
   const HittingJournalScreen({super.key});
 
   @override
-  State<HittingJournalScreen> createState() => _HittingJournalScreenState(); // Renamed State class
+  State<HittingJournalScreen> createState() => _HittingJournalScreenState();
 }
 
 class _HittingJournalScreenState extends State<HittingJournalScreen> {
   // State for the slider
-  double _dialedInValue = 7.0; // Initial value based on the image
+  double _dialedInValue = 7.0; // Initial value
 
   // Controllers for text fields
   final TextEditingController _primaryFocusController = TextEditingController();
   final TextEditingController _atBatsController = TextEditingController();
-  final TextEditingController _atBatsResultsController =
-      TextEditingController();
-  final TextEditingController _somethingPositiveController =
-      TextEditingController();
+  final TextEditingController _atBatsResultsController = TextEditingController();
+  final TextEditingController _somethingPositiveController = TextEditingController();
+  final TextEditingController logExerciseController = TextEditingController();
+
+  // State variables
+  bool showLogWidget = false;
+  bool isSubmitting = false;
 
   @override
   void dispose() {
@@ -84,17 +88,207 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
     _atBatsController.dispose();
     _atBatsResultsController.dispose();
     _somethingPositiveController.dispose();
+    logExerciseController.dispose();
     super.dispose();
   }
 
-  bool showLogWidget = false;
+  // Validate form data
+  bool _validateForm() {
+    // Check if primary focus is filled
+    if (_primaryFocusController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please enter your primary focus for today',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if at-bats number is filled and valid
+    if (_atBatsController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please enter the number of at-bats',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Validate at-bats is a valid number
+    final atBatsText = _atBatsController.text.trim();
+    final atBatsNumber = int.tryParse(atBatsText);
+    if (atBatsNumber == null || atBatsNumber < 0) {
+      Get.snackbar(
+        'Validation Error',
+        'Please enter a valid number for at-bats',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if at-bats results is filled
+    if (_atBatsResultsController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please enter the results of your at-bats',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if something positive is filled
+    if (_somethingPositiveController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please enter something positive about today',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // Submit hitting journal data
+  Future<void> submitHittingJournal() async {
+    if (!_validateForm()) return;
+
+    try {
+      setState(() {
+        isSubmitting = true;
+      });
+
+      // Check if AuthController is available
+      if (!Get.isRegistered<AuthController>()) {
+        Get.snackbar(
+          'Error',
+          'Authentication not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      final authController = Get.find<AuthController>();
+      
+      // Get current user ID and token
+      final userId = authController.currentUser.value?.id;
+      final token = authController.accessToken.value;
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (token.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Access token not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Create request data
+      final requestData = {
+        'userId': userId,
+        'date': DateTime.now().toIso8601String(),
+        'hittingJournal': {
+          'dialedInValue': _dialedInValue.round(),
+          'primaryFocus': _primaryFocusController.text.trim(),
+          'atBats': int.parse(_atBatsController.text.trim()),
+          'atBatsResults': _atBatsResultsController.text.trim(),
+          'somethingPositive': _somethingPositiveController.text.trim(),
+          'loggedExercises': showLogWidget && logExerciseController.text.trim().isNotEmpty
+              ? logExerciseController.text.trim()
+              : null,
+        }
+      };
+
+      // Print for debugging (you can replace this with actual API call)
+      print('Hitting Journal Data:');
+      print('Dialed In Value: ${_dialedInValue.round()}');
+      print('Primary Focus: ${_primaryFocusController.text.trim()}');
+      print('At Bats: ${_atBatsController.text.trim()}');
+      print('At Bats Results: ${_atBatsResultsController.text.trim()}');
+      print('Something Positive: ${_somethingPositiveController.text.trim()}');
+      print('Logged Exercises: ${logExerciseController.text.trim()}');
+      print('Request Data: $requestData');
+
+      // TODO: Replace with actual API call
+      // final response = await ApiService.submitHittingJournal(
+      //   request: requestData,
+      //   token: token,
+      // );
+
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Show success message
+      Get.snackbar(
+        'Success',
+        'Hitting journal submitted successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Reset form
+      _resetForm();
+
+      // Navigate back
+      Get.back();
+
+    } catch (e) {
+      // Handle unexpected errors
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        isSubmitting = false;
+      });
+    }
+  }
+
+  // Reset form to default values
+  void _resetForm() {
+    setState(() {
+      _dialedInValue = 7.0;
+      _primaryFocusController.clear();
+      _atBatsController.clear();
+      _atBatsResultsController.clear();
+      _somethingPositiveController.clear();
+      logExerciseController.clear();
+      showLogWidget = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Ensure ScreenUtil is initialized if used in other parts of your app
-    // If not, you might need to initialize it here or wrap your MaterialApp.
-    // ScreenUtil.init(context, designSize: Size(360, 690)); // Example initialization
-
     return Scaffold(
       backgroundColor: AppStyles.backgroundColor,
       appBar: AppBar(
@@ -110,21 +304,20 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3), // Circle background
+                color: Colors.grey.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.notifications_none_outlined, // Or Icons.notifications
+                Icons.notifications_none_outlined,
                 color: AppStyles.textColor,
                 size: 24,
               ),
             ),
             onPressed: () {
-              // Handle notification tap - Ensure NotificationScreen exists
               Get.to(() => NotificationScreen());
             },
           ),
-          SizedBox(width: 10.w), // Add some padding
+          SizedBox(width: 10.w),
         ],
       ),
       body: SingleChildScrollView(
@@ -132,50 +325,42 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Introductory text (matches the image text)
             Text(
-              'Track your arm care routines and recovery modalities', // Text from the image
+              'Track your hitting performance and daily progress',
               style: AppStyles.bodyText.copyWith(color: AppStyles.hintColor),
             ),
             SizedBox(height: 25.h),
 
             // --- Question 1: How dialed in were you... (Slider) ---
             Text(
-              '1. How dialed in were you during your pregame routine today? (Batting practice. tee work. drills. movement prep. etc)',
+              '1. How dialed in were you during your pregame routine today? (Batting practice, tee work, drills, movement prep, etc)',
               style: AppStyles.labelText,
             ),
             SizedBox(height: 10.h),
             Row(
               children: [
-                // Slider
                 Expanded(
                   child: SliderTheme(
                     data: SliderThemeData(
-                      trackHeight: 8.h, // Adjust track height
+                      trackHeight: 8.h,
                       thumbShape: const RoundSliderThumbShape(
                         enabledThumbRadius: 10.0,
-                      ), // Adjust thumb size
+                      ),
                       overlayShape: const RoundSliderOverlayShape(
                         overlayRadius: 20.0,
-                      ), // Adjust overlay size
-                      activeTrackColor: AppStyles.primaryColor, // Yellow track
-                      inactiveTrackColor:
-                          AppStyles.cardColor, // Dark grey inactive track
-                      thumbColor: AppStyles.textColor, // White thumb
-                      overlayColor: AppStyles.primaryColor.withOpacity(
-                        0.2,
-                      ), // Yellow overlay
-                      valueIndicatorColor:
-                          AppStyles.primaryColor, // Value indicator color
-                      valueIndicatorTextStyle:
-                          AppStyles
-                              .buttonTextStyle, // Value indicator text style
+                      ),
+                      activeTrackColor: AppStyles.primaryColor,
+                      inactiveTrackColor: AppStyles.cardColor,
+                      thumbColor: AppStyles.textColor,
+                      overlayColor: AppStyles.primaryColor.withOpacity(0.2),
+                      valueIndicatorColor: AppStyles.primaryColor,
+                      valueIndicatorTextStyle: AppStyles.buttonTextStyle,
                     ),
                     child: Slider(
                       value: _dialedInValue,
-                      min: 1.0, // Assuming a scale of 1 to 10
+                      min: 1.0,
                       max: 10.0,
-                      divisions: 9, // 1 through 10
+                      divisions: 9,
                       label: _dialedInValue.round().toString(),
                       onChanged: (newValue) {
                         setState(() {
@@ -185,13 +370,10 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 10.w), // Space between slider and number
-                // Display the current value
+                SizedBox(width: 10.w),
                 Text(
                   _dialedInValue.round().toString(),
-                  style: AppStyles.bodyText.copyWith(
-                    fontSize: 18.sp,
-                  ), // Larger text for number
+                  style: AppStyles.bodyText.copyWith(fontSize: 18.sp),
                 ),
               ],
             ),
@@ -206,7 +388,7 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             _buildTextField(
               controller: _primaryFocusController,
               hintText: 'Describe today\'s focus...',
-              maxLines: 4, // Multiple lines
+              maxLines: 4,
             ),
             SizedBox(height: 25.h),
 
@@ -218,11 +400,9 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             SizedBox(height: 10.h),
             _buildTextField(
               controller: _atBatsController,
-              hintText: '....', // Hint text from image
-              maxLines: 1, // Single line
-              keyboardType: TextInputType.numberWithOptions(
-                decimal: false,
-              ), // Suggest numeric keyboard
+              hintText: 'Enter number of at-bats...',
+              maxLines: 1,
+              keyboardType: const TextInputType.numberWithOptions(decimal: false),
             ),
             SizedBox(height: 25.h),
 
@@ -234,8 +414,8 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             SizedBox(height: 10.h),
             _buildTextField(
               controller: _atBatsResultsController,
-              hintText: 'Enter today\'s results...', // Hint text from image
-              maxLines: 4, // Multiple lines
+              hintText: 'Enter today\'s results...',
+              maxLines: 4,
             ),
             SizedBox(height: 25.h),
 
@@ -247,43 +427,35 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             SizedBox(height: 10.h),
             _buildTextField(
               controller: _somethingPositiveController,
-              hintText:
-                  'One positive thing about today...', // Hint text from image
-              maxLines: 4, // Multiple lines
+              hintText: 'One positive thing about today...',
+              maxLines: 4,
             ),
-            SizedBox(height: 25.h), // Space before the Log Exercises button
-            // --- Log Exercises Button (from image) ---
-            SizedBox(height: 20.h),
+            SizedBox(height: 25.h),
 
+            // --- Log Exercises Button ---
             showLogWidget
                 ? _buildLogWidget()
                 : ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppStyles.cardColor, // Darker background
-                    foregroundColor: AppStyles.primaryColor, // Yellow text
-                    minimumSize: Size(double.infinity, 50.h), // Full width
+                    backgroundColor: AppStyles.cardColor,
+                    foregroundColor: AppStyles.primaryColor,
+                    minimumSize: Size(double.infinity, 50.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        25.r,
-                      ), // Rounded corners
+                      borderRadius: BorderRadius.circular(25.r),
                     ),
-                    elevation: 0, // No shadow
+                    elevation: 0,
                   ),
                   onPressed: () {
-                    // Handle Log Exercises tap
                     setState(() {
                       showLogWidget = !showLogWidget;
                     });
-                    print("Log Exercises Tapped");
                   },
                   child: const Text(
                     'Log Exercises for Future Ref.',
                     style: AppStyles.secondaryButtonTextStyle,
                   ),
                 ),
-            SizedBox(
-              height: 20.h,
-            ), // Space before the final submit button (adjust as needed)
+            SizedBox(height: 20.h),
           ],
         ),
       ),
@@ -294,26 +466,21 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
           right: 20.w,
           bottom: 20.h,
           top: 10.h,
-        ), // Adjust padding
+        ),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppStyles.primaryColor,
-            foregroundColor: Colors.black, // Text color
-            minimumSize: Size(double.infinity, 50.h), // Full width
+            foregroundColor: Colors.black,
+            minimumSize: Size(double.infinity, 50.h),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.r), // Rounded corners
+              borderRadius: BorderRadius.circular(25.r),
             ),
           ),
-          onPressed: () {
-            // Handle submission - Access data from state and controllers
-            print('Dialed In Value: ${_dialedInValue.round()}');
-            print('Primary Focus: ${_primaryFocusController.text}');
-            print('At Bats: ${_atBatsController.text}');
-            print('At Bats Results: ${_atBatsResultsController.text}');
-            print('Something Positive: ${_somethingPositiveController.text}');
-            // Add logic to save or process the data
-          },
-          child: const Text('Submit', style: AppStyles.buttonTextStyle),
+          onPressed: isSubmitting ? null : submitHittingJournal,
+          child: Text(
+            isSubmitting ? 'Submitting...' : 'Submit',
+            style: AppStyles.buttonTextStyle,
+          ),
         ),
       ),
     );
@@ -323,22 +490,22 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
-    int maxLines = 1, // Default to single line
+    int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      style: AppStyles.inputTextStyle, // Use the new input text style
+      style: AppStyles.inputTextStyle,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: AppStyles.hintStyle,
         filled: true,
-        fillColor: AppStyles.cardColor, // Dark grey background
+        fillColor: AppStyles.cardColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r), // Rounded corners
-          borderSide: BorderSide.none, // No visible border line
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -349,12 +516,12 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
           borderSide: BorderSide(
             color: AppStyles.primaryColor,
             width: 1.5,
-          ), // Highlight with yellow border when focused
+          ),
         ),
         contentPadding: EdgeInsets.symmetric(
           horizontal: 15.w,
           vertical: 12.h,
-        ), // Adjust padding inside
+        ),
       ),
     );
   }
@@ -372,15 +539,39 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
                   showLogWidget = !showLogWidget;
                 });
               },
-              icon: Icon(Icons.cancel, color: Colors.red),
+              icon: const Icon(Icons.cancel, color: Colors.red),
             ),
           ],
         ),
         SizedBox(height: 8.h),
         TextField(
+          controller: logExerciseController,
           maxLines: 4,
+          style: AppStyles.inputTextStyle,
           decoration: InputDecoration(
-            hintText: 'List the exercise, and reps you performed today...',
+            hintText: 'List the exercises and reps you performed today...',
+            hintStyle: AppStyles.hintStyle,
+            filled: true,
+            fillColor: AppStyles.cardColor,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(
+                color: AppStyles.primaryColor,
+                width: 1.5,
+              ),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 15.w,
+              vertical: 12.h,
+            ),
           ),
         ),
       ],

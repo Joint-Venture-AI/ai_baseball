@@ -39,15 +39,33 @@ class NutritionScreen extends StatelessWidget {
                   context: context,
                 ),
                 SizedBox(height: 10.h),
-                _buildSliderSection(
-                  label:
-                      'On a scale of 1 to 10, how well do you feel you did with your protein intake?',
-                  value: nutritionController.proteinValue.value,
-                  onChanged: (v) {
-                    nutritionController.proteinValue.value = v;
-                  },
-                  context: context,
+                Text(
+                  'How many grams of protein total did you have today?',
+                  style: AppStyles.labelText,
                 ),
+                SizedBox(height: 10.h),
+                TextFormField(
+                  controller: nutritionController.proteinIntakeController,
+                  maxLines: 1,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Protein Intake (grams)',
+                    hintText: 'Enter total grams of protein',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                      borderSide: BorderSide(color: AppStyles.primaryColor),
+                    ),
+                  ),
+                ),
+                // _buildSliderSection(
+                //   label:
+                //       'On a scale of 1 to 10, how well do you feel you did with your protein intake?',
+                //   value: nutritionController.proteinValue.value,
+                //   onChanged: (v) {
+                //     nutritionController.proteinValue.value = v;
+                //   },
+                //   context: context,
+                // ),
                 SizedBox(height: 10.h),
                 _buildSliderSection(
                   label:

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../core/services/api_service.dart';
+
 // Assuming AppStyles exists in your project like this:
 class AppStyles {
   static const Color backgroundColor = Color(0xFF1A1A1A); // Dark background
@@ -69,21 +71,21 @@ class _LiftingScreenState extends State<LiftingScreen> {
   // Text controller for logging exercises
   final TextEditingController logExerciseController = TextEditingController();
 
-  // State maps for checkboxes
+  // Updated to match backend validation - exact enum values
   Map<String, bool> liftTypeOptions = {
-    'Upper Body': false,
-    'Lower Body': false,
-    'Total Body': false,
-    'Plyometrics': false,
-    'Speed & Agility': false,
+    'Upper Body': false,      // ✓ Matches backend
+    'Total Body': false,      // ✓ Matches backend  
+    'Speed & Agility': false, // ✓ Matches backend
+    'Lower Body': false,      // ✓ Matches backend
+    'Plyometrics': false,     // ✓ Matches backend
   };
 
-  // Using descriptive keys for easier identification later
-  Map<String, bool> variableFocusOptions = {
-    'Speed (fast movement execution)': false,
-    'Eccentric (slow lowering phase)': false,
-    'Isometric (holding position)': false,
-    'Concentric (lifting phase emphasis)': false,
+  // Updated to match backend validation - simplified keys for exact enum matching
+  Map<String, bool> focusOptions = {
+    'Speed': false,       // Backend expects: "Speed" (not "Speed (fast movement execution)")
+    'Eccentric': false,   // Backend expects: "Eccentric" (not "Eccentric (slow lowering phase)")
+    'Isometric': false,   // Backend expects: "Isometric" (not "Isometric (holding position)")
+    'Concentric': false,  // Backend expects: "Concentric" (not "Concentric (lifting phase emphasis)")
   };
 
   bool showLogWidget = false;
@@ -109,11 +111,11 @@ class _LiftingScreenState extends State<LiftingScreen> {
       return false;
     }
 
-    // Check if at least one variable focus is selected
-    if (!variableFocusOptions.values.any((selected) => selected)) {
+    // Check if at least one focus is selected
+    if (!focusOptions.values.any((selected) => selected)) {
       Get.snackbar(
         'Validation Error',
-        'Please select at least one variable focus option',
+        'Please select at least one focus option',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -132,8 +134,8 @@ class _LiftingScreenState extends State<LiftingScreen> {
         .toList();
   }
 
-  List<String> getSelectedVariableFocus() {
-    return variableFocusOptions.entries
+  List<String> getSelectedFocus() {
+    return focusOptions.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
@@ -188,43 +190,54 @@ class _LiftingScreenState extends State<LiftingScreen> {
         return;
       }
 
-      // Create request data
+      // Create request data matching backend schema exactly
       final requestData = {
         'userId': userId,
         'date': DateTime.now().toIso8601String(),
-        'lifting': {
-          'liftTypes': getSelectedLiftTypes(),
-          'variableFocus': getSelectedVariableFocus(),
-          'loggedExercises': showLogWidget && logExerciseController.text.trim().isNotEmpty
+        'Lifting': {  // Note: Backend uses capital 'L' in 'Lifting'
+          'liftingType': getSelectedLiftTypes(),  // Backend expects 'liftingType' (not 'liftTypes')
+          'focus': getSelectedFocus(),            // Backend expects 'focus' (not 'variableFocus')
+          'exercisesLog': showLogWidget && logExerciseController.text.trim().isNotEmpty
               ? logExerciseController.text.trim()
               : null,
         }
       };
 
-      // Print for debugging (you can replace this with actual API call)
+      // Print for debugging
       print('Lifting Data:');
-      print('Lift Types: ${getSelectedLiftTypes()}');
-      print('Variable Focus: ${getSelectedVariableFocus()}');
-      print('Logged Exercises: ${logExerciseController.text}');
+      print('Lifting Types: ${getSelectedLiftTypes()}');
+      print('Focus: ${getSelectedFocus()}');
+      print('Exercises Log: ${logExerciseController.text}');
       print('Request Data: $requestData');
 
-      // TODO: Replace with actual API call
-      // final response = await ApiService.submitLiftingData(
-      //   request: requestData,
-      //   token: token,
-      // );
-
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Show success message
-      Get.snackbar(
-        'Success',
-        'Lifting data submitted successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      // Call API
+      final response = await ApiService.submitLiftingData(
+        request: requestData,
+        token: token,
       );
+
+      if (response == null || !response.success) {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to submit lifting data',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }else if (response.message.isNotEmpty) {
+        print('Response Message: ${response.message}');
+         // Show success message
+        Get.snackbar(
+          'Success',
+          'Lifting data submitted successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }
+
+     
 
       // Reset form
       _resetForm();
@@ -255,8 +268,8 @@ class _LiftingScreenState extends State<LiftingScreen> {
       for (String key in liftTypeOptions.keys) {
         liftTypeOptions[key] = false;
       }
-      for (String key in variableFocusOptions.keys) {
-        variableFocusOptions[key] = false;
+      for (String key in focusOptions.keys) {
+        focusOptions[key] = false;
       }
 
       // Reset text controller and widget visibility
@@ -282,21 +295,20 @@ class _LiftingScreenState extends State<LiftingScreen> {
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3), // Circle background
+                color: Colors.grey.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.notifications_none_outlined, // Or Icons.notifications
+                Icons.notifications_none_outlined,
                 color: AppStyles.textColor,
-                size: 24, // Adjust size
+                size: 24,
               ),
             ),
             onPressed: () {
-              // Handle notification tap
               Get.to(() => NotificationScreen());
             },
           ),
-          SizedBox(width: 10.w), // Add some padding
+          SizedBox(width: 10.w),
         ],
       ),
       body: SingleChildScrollView(
@@ -314,16 +326,14 @@ class _LiftingScreenState extends State<LiftingScreen> {
             _buildCheckboxSection(
               title: "What type of lifting did you perform today?",
               options: liftTypeOptions,
-              // Adjust aspect ratio if needed based on number of items
               childAspectRatio: 4 / 1,
             ),
 
-            // --- Variable Focus Section ---
+            // --- Focus Section (Updated title to match simplified options) ---
             _buildCheckboxSection(
-              title: "Did the lift focus on any variables?",
-              options: variableFocusOptions,
-              // This group has longer text, potentially needing more height
-              childAspectRatio: 4.5 / 1, // Increase height slightly
+              title: "What was the focus of your lifting session?",
+              options: focusOptions,
+              childAspectRatio: 4 / 1, // Simplified text, so normal ratio is fine
             ),
 
             SizedBox(height: 30.h),
@@ -333,31 +343,25 @@ class _LiftingScreenState extends State<LiftingScreen> {
                 ? _buildLogWidget()
                 : ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppStyles.cardColor, // Darker background
-                    foregroundColor: AppStyles.primaryColor, // Yellow text
-                    minimumSize: Size(double.infinity, 50.h), // Full width
+                    backgroundColor: AppStyles.cardColor,
+                    foregroundColor: AppStyles.primaryColor,
+                    minimumSize: Size(double.infinity, 50.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        25.r,
-                      ), // Rounded corners
+                      borderRadius: BorderRadius.circular(25.r),
                     ),
-                    elevation: 0, // No shadow
+                    elevation: 0,
                   ),
                   onPressed: () {
-                    // Handle Log Exercises tap
                     setState(() {
                       showLogWidget = !showLogWidget;
                     });
-                    print("Log Exercises Tapped");
                   },
                   child: const Text(
                     'Log Exercises for Future Ref.',
                     style: AppStyles.secondaryButtonTextStyle,
                   ),
                 ),
-            SizedBox(
-              height: 20.h,
-            ), // Space before the final submit button if needed
+            SizedBox(height: 20.h),
           ],
         ),
       ),
@@ -368,14 +372,14 @@ class _LiftingScreenState extends State<LiftingScreen> {
           right: 20.w,
           bottom: 20.h,
           top: 10.h,
-        ), // Adjust padding
+        ),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppStyles.primaryColor,
-            foregroundColor: Colors.black, // Text color
-            minimumSize: Size(double.infinity, 50.h), // Full width
+            foregroundColor: Colors.black,
+            minimumSize: Size(double.infinity, 50.h),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.r), // Rounded corners
+              borderRadius: BorderRadius.circular(25.r),
             ),
           ),
           onPressed: isSubmitting ? null : submitLiftingData,
@@ -388,7 +392,7 @@ class _LiftingScreenState extends State<LiftingScreen> {
     );
   }
 
-  // --- Helper Widget for Checkbox Sections (Reused from ArmCareScreen) ---
+  // --- Helper Widget for Checkbox Sections ---
   Widget _buildCheckboxSection({
     required String title,
     required Map<String, bool> options,
@@ -404,23 +408,19 @@ class _LiftingScreenState extends State<LiftingScreen> {
           Text(title, style: AppStyles.labelText),
           SizedBox(height: 15.h),
           GridView.builder(
-            padding: EdgeInsets.zero, // Remove default GridView padding
-            shrinkWrap: true, // Important for GridView inside Column/ScrollView
-            physics:
-                const NeverScrollableScrollPhysics(), // Disable GridView scrolling
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Two columns
-              childAspectRatio: childAspectRatio, // Use parameter
-              crossAxisSpacing: 10.w, // Horizontal spacing
-              mainAxisSpacing: 12.h, // Vertical spacing adjusted slightly
+              crossAxisCount: 2,
+              childAspectRatio: childAspectRatio,
+              crossAxisSpacing: 10.w,
+              mainAxisSpacing: 12.h,
             ),
-            itemCount: keys.length, // No "Others" option here
+            itemCount: keys.length,
             itemBuilder: (context, index) {
               String key = keys[index];
-              return _buildCheckboxTile(
-                key,
-                options,
-              ); // Build regular checkbox item
+              return _buildCheckboxTile(key, options);
             },
           ),
         ],
@@ -428,18 +428,16 @@ class _LiftingScreenState extends State<LiftingScreen> {
     );
   }
 
-  // --- Helper Widget for a single Checkbox Tile (Reused from ArmCareScreen) ---
+  // --- Helper Widget for a single Checkbox Tile ---
   Widget _buildCheckboxTile(String key, Map<String, bool> optionsMap) {
     return GestureDetector(
-      // Make text tappable
       onTap: () {
         setState(() {
           optionsMap[key] = !(optionsMap[key] ?? false);
         });
       },
       child: Row(
-        mainAxisSize:
-            MainAxisSize.min, // Prevent row from expanding unnecessarily
+        mainAxisSize: MainAxisSize.min,
         children: [
           Checkbox(
             value: optionsMap[key] ?? false,
@@ -449,9 +447,8 @@ class _LiftingScreenState extends State<LiftingScreen> {
               });
             },
             activeColor: AppStyles.checkboxActiveColor,
-            checkColor: Colors.black, // Color of the checkmark
+            checkColor: Colors.black,
             side: MaterialStateBorderSide.resolveWith(
-              // Border style
               (states) {
                 if (states.contains(MaterialState.selected)) {
                   return const BorderSide(
@@ -468,22 +465,16 @@ class _LiftingScreenState extends State<LiftingScreen> {
             visualDensity: const VisualDensity(
               horizontal: -4,
               vertical: -4,
-            ), // Compact size
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
-            ), // Slightly rounded square
+            ),
           ),
-          // SizedBox(width: 4.w), // Optional small space
           Flexible(
-            // Allow text to wrap
             child: Text(
               key,
-              style:
-                  AppStyles
-                      .smallBodyText, // Use slightly smaller text for checkbox labels
-              overflow:
-                  TextOverflow
-                      .visible, // Allow text to wrap onto next line if needed
+              style: AppStyles.bodyText, // Use normal body text since options are simpler now
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

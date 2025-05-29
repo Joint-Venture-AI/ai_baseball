@@ -11,13 +11,21 @@ class VisualizationController extends GetxController {
   // Observable variables
   final RxInt currentSession = 1.obs;
   final RxInt totalSessions = 4.obs;
-  final RxInt remainingSeconds = 240.obs; // 4 minutes per session (4*60)
+  final RxInt remainingSeconds = 24.obs; // 4 minutes per session (4*60)
   final RxBool isRunning = false.obs;
-  final RxBool isSaving = false.obs; // New: for API call state
-  final RxString savingMessage = ''.obs; // New: for saving feedback
+  final RxBool isSaving = false.obs;
+  final RxString savingMessage = ''.obs;
   
   // Session duration (4 minutes in seconds)
-  static const int sessionDuration = 240;
+  static const int sessionDuration = 24;
+  
+  // Session names for better UX
+  final List<String> sessionNames = [
+    'Box Breathing',
+    'Game Environment',
+    'Game Execution',
+    'Pregame Routine',
+  ];
   
   @override
   void onInit() {
@@ -29,6 +37,14 @@ class VisualizationController extends GetxController {
   void onClose() {
     _timer?.cancel();
     super.onClose();
+  }
+
+  // Get current session name
+  String get currentSessionName {
+    if (currentSession.value > 0 && currentSession.value <= sessionNames.length) {
+      return sessionNames[currentSession.value - 1];
+    }
+    return 'Session ${currentSession.value}';
   }
 
   // Computed properties
@@ -111,11 +127,58 @@ class VisualizationController extends GetxController {
     }
   }
 
+  // Generate session-specific data based on current session
+  Map<String, dynamic> _getSessionData() {
+    final sessionTime = (sessionDuration / 60).round(); // Convert to minutes
+    
+    switch (currentSession.value) {
+      case 1: // Box Breathing
+        return {
+          'visualization': {
+            'boxBreathing': true,
+            'boxBreathingTime': sessionTime,
+          }
+        };
+        
+      case 2: // Game Environment
+        return {
+          'visualization': {
+            'gameEnvironment': true,
+            'gameEnvironmentTime': sessionTime,
+          }
+        };
+        
+      case 3: // Game Execution
+        return {
+          'visualization': {
+            'gameExecution': true, // Changed to true since session was completed
+            'gameExecutionTime': sessionTime,
+          }
+        };
+        
+      case 4: // Pregame Routine
+        return {
+          'visualization': {
+            'pregameRoutine': true,
+            'pregameRoutineTime': sessionTime,
+          }
+        };
+        
+      default:
+        return {
+          'visualization': {
+            'boxBreathing': true,
+            'boxBreathingTime': sessionTime,
+          }
+        };
+    }
+  }
+
   // API call to save session data
   Future<void> _saveSessionToAPI() async {
     try {
       isSaving.value = true;
-      savingMessage.value = 'Saving session ${currentSession.value}...';
+      savingMessage.value = 'Saving ${currentSessionName}...';
 
       // Check authentication
       if (!Get.isRegistered<AuthController>()) {
@@ -134,44 +197,34 @@ class VisualizationController extends GetxController {
         throw Exception('Access token not found. Please login again.');
       }
 
-      // Create request data
+      // Create request data with session-specific content
       final requestData = {
         'userId': userId,
         'date': DateTime.now().toIso8601String(),
-        'visualization': {
-          'sessionNumber': currentSession.value,
-          'totalSessions': totalSessions.value,
-          'duration': sessionDuration, // Duration in seconds
-          'completedAt': DateTime.now().toIso8601String(),
-          'type': 'box_breathing',
-        }
+        ..._getSessionData(), // Spread the session-specific data
       };
 
       // Print for debugging
       print('Saving Visualization Session:');
-      print('Session: ${currentSession.value}/${totalSessions.value}');
+      print('Session: ${currentSession.value}/${totalSessions.value} - ${currentSessionName}');
       print('Request Data: $requestData');
 
-      // TODO: Replace with actual API call
-      // final response = await ApiService.submitVisualizationSession(
-      //   request: requestData,
-      //   token: token,
-      // );
+      // Call API
+      final response = await ApiService.submitVisualizationSession(
+        request: requestData.cast<String, Object>(),
+        token: token,
+      );
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
+      if (response == null || !response.success) {
+        throw Exception('Failed to save session: ${response?.message ?? 'Unknown error'}');
+      }
 
-      // Simulate successful response
-      // if (response == null || !response.success) {
-      //   throw Exception(response?.message ?? 'Failed to save session data');
-      // }
-
-      savingMessage.value = 'Session ${currentSession.value} saved!';
+      savingMessage.value = '${currentSessionName} saved!';
       
       // Show success message
       Get.snackbar(
         'Session Saved',
-        'Session ${currentSession.value} completed and saved successfully!',
+        '${currentSessionName} completed and saved successfully!',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: const Color(0xFFFFFFFF),
@@ -186,7 +239,7 @@ class VisualizationController extends GetxController {
       
       Get.snackbar(
         'Save Error',
-        'Failed to save session: ${e.toString()}',
+        'Failed to save ${currentSessionName}: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: const Color(0xFFFFFFFF),
@@ -208,7 +261,7 @@ class VisualizationController extends GetxController {
     
     Get.snackbar(
       'Next Session',
-      'Ready for session ${currentSession.value}/${totalSessions.value}',
+      'Ready for ${currentSessionName} (${currentSession.value}/${totalSessions.value})',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFFFFD700),
       colorText: const Color(0xFF000000),
@@ -219,9 +272,6 @@ class VisualizationController extends GetxController {
   // Handle completion of all sessions
   void _onAllSessionsCompleted() async {
     savingMessage.value = 'All sessions completed!';
-    
-    // Call API to mark entire visualization session as complete
-    await _saveCompletedVisualizationToAPI();
     
     Get.snackbar(
       'Congratulations!',
@@ -237,52 +287,19 @@ class VisualizationController extends GetxController {
     Get.back();
   }
 
-  // API call to save completed visualization session
-  Future<void> _saveCompletedVisualizationToAPI() async {
-    try {
-      isSaving.value = true;
-      savingMessage.value = 'Saving completed visualization...';
-
-      final authController = Get.find<AuthController>();
-      final userId = authController.currentUser.value?.id;
-      final token = authController.accessToken.value;
-
-      final requestData = {
-        'userId': userId,
-        'date': DateTime.now().toIso8601String(),
-        'visualizationComplete': {
-          'totalSessions': totalSessions.value,
-          'totalDuration': sessionDuration * totalSessions.value,
-          'completedAt': DateTime.now().toIso8601String(),
-          'type': 'box_breathing',
-          'status': 'completed',
-        }
-      };
-
-      print('Saving Completed Visualization:');
-      print('Request Data: $requestData');
-
-      // TODO: Replace with actual API call
-      // final response = await ApiService.submitCompletedVisualization(
-      //   request: requestData,
-      //   token: token,
-      // );
-
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      savingMessage.value = 'Visualization completed and saved!';
-
-    } catch (e) {
-      print('Error saving completed visualization: $e');
-    } finally {
-      isSaving.value = false;
-    }
-  }
-
   // Manual session completion (for testing)
   void completeCurrentSession() {
     remainingSeconds.value = 0;
     _onSessionCompleted();
+  }
+
+  // Skip to specific session (for testing/development)
+  void skipToSession(int sessionNumber) {
+    if (sessionNumber >= 1 && sessionNumber <= totalSessions.value) {
+      stopTimer();
+      currentSession.value = sessionNumber;
+      remainingSeconds.value = sessionDuration;
+      savingMessage.value = '';
+    }
   }
 }

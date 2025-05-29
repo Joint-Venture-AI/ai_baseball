@@ -678,5 +678,140 @@ class ApiService {
     }
   }
 
+  static Future<DailyLogsResponse> submitLiftingData({
+    required String token,
+    required Map<String, Object> request,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dailyLogs}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(request),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return DailyLogsResponse(
+          success: true,
+          message: responseData['message'] ?? 'Daily logs submitted successfully',
+          data: responseData['data'],
+        );
+      } else {
+        return DailyLogsResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit daily logs',
+        );
+      }
+    } on SocketException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'No internet connection',
+      );
+    } on FormatException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Invalid response format',
+      );
+    } catch (e) {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Failed to submit daily logs',
+      );
+    }
+  }
+
+  static Future<DailyLogsResponse> submitHittingJournal({
+    required String token,
+    required Map<String, Object> request,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dailyLogs}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(request),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return DailyLogsResponse(
+          success: true,
+          message: responseData['message'] ?? 'Daily logs submitted successfully',
+          data: responseData['data'],
+        );
+      } else {
+        return DailyLogsResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit daily logs',
+        );
+      }
+    } on SocketException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'No internet connection',
+      );
+    } on FormatException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Invalid response format',
+      );
+    } catch (e) {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Failed to submit daily logs',
+      );
+    }
+  }
+
+  static Future<DailyLogsResponse> submitVisualizationSession({
+    required String token,
+    required Map<String, Object> request,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dailyLogs}');
+      
+      final response = await http.post(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+        body: jsonEncode(request),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return DailyLogsResponse(
+          success: true,
+          message: responseData['message'] ?? 'Daily logs submitted successfully',
+          data: responseData['data'],
+        );
+      } else {
+        return DailyLogsResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to submit daily logs',
+        );
+      }
+    } on SocketException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'No internet connection',
+      );
+    } on FormatException {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Invalid response format',
+      );
+    } catch (e) {
+      return DailyLogsResponse(
+        success: false,
+        message: 'Failed to submit daily logs',
+      );
+    }
+  }
+
 
 }

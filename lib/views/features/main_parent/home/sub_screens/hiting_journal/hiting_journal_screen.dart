@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../core/services/api_service.dart';
+
 // Assuming AppStyles exists in your project and contains the necessary definitions:
 class AppStyles {
   static const Color backgroundColor = Color(0xFF1A1A1A); // Dark background
@@ -67,15 +69,15 @@ class HittingJournalScreen extends StatefulWidget {
 }
 
 class _HittingJournalScreenState extends State<HittingJournalScreen> {
-  // State for the slider
-  double _dialedInValue = 7.0; // Initial value
+  // State for the slider - matches backend field name
+  double _pregameEngagementValue = 7.0; // Backend expects 'pregameEngagement'
 
-  // Controllers for text fields
-  final TextEditingController _primaryFocusController = TextEditingController();
-  final TextEditingController _atBatsController = TextEditingController();
-  final TextEditingController _atBatsResultsController = TextEditingController();
-  final TextEditingController _somethingPositiveController = TextEditingController();
-  final TextEditingController logExerciseController = TextEditingController();
+  // Controllers for text fields - updated to match backend field names
+  final TextEditingController _primaryFocusController = TextEditingController(); // ✓ Matches backend
+  final TextEditingController _atBatsController = TextEditingController(); // ✓ Matches backend
+  final TextEditingController _atBatResultsController = TextEditingController(); // Backend expects 'atBatResults' (singular)
+  final TextEditingController _positiveOutcomeController = TextEditingController(); // Backend expects 'positiveOutcome'
+  final TextEditingController logExerciseController = TextEditingController(); // Backend expects 'exercisesLog'
 
   // State variables
   bool showLogWidget = false;
@@ -86,15 +88,15 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
     // Dispose controllers when the widget is removed
     _primaryFocusController.dispose();
     _atBatsController.dispose();
-    _atBatsResultsController.dispose();
-    _somethingPositiveController.dispose();
+    _atBatResultsController.dispose();
+    _positiveOutcomeController.dispose();
     logExerciseController.dispose();
     super.dispose();
   }
 
   // Validate form data
   bool _validateForm() {
-    // Check if primary focus is filled
+    // Check if primary focus is filled (required)
     if (_primaryFocusController.text.trim().isEmpty) {
       Get.snackbar(
         'Validation Error',
@@ -106,7 +108,7 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
       return false;
     }
 
-    // Check if at-bats number is filled and valid
+    // Check if at-bats number is filled and valid (required)
     if (_atBatsController.text.trim().isEmpty) {
       Get.snackbar(
         'Validation Error',
@@ -118,13 +120,13 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
       return false;
     }
 
-    // Validate at-bats is a valid number
+    // Validate at-bats is a valid number (min 0)
     final atBatsText = _atBatsController.text.trim();
     final atBatsNumber = int.tryParse(atBatsText);
     if (atBatsNumber == null || atBatsNumber < 0) {
       Get.snackbar(
         'Validation Error',
-        'Please enter a valid number for at-bats',
+        'Please enter a valid number for at-bats (0 or greater)',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -132,8 +134,8 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
       return false;
     }
 
-    // Check if at-bats results is filled
-    if (_atBatsResultsController.text.trim().isEmpty) {
+    // Check if at-bat results is filled (required)
+    if (_atBatResultsController.text.trim().isEmpty) {
       Get.snackbar(
         'Validation Error',
         'Please enter the results of your at-bats',
@@ -144,8 +146,8 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
       return false;
     }
 
-    // Check if something positive is filled
-    if (_somethingPositiveController.text.trim().isEmpty) {
+    // Check if positive outcome is filled (required)
+    if (_positiveOutcomeController.text.trim().isEmpty) {
       Get.snackbar(
         'Validation Error',
         'Please enter something positive about today',
@@ -208,40 +210,48 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
         return;
       }
 
-      // Create request data
+      // Create request data matching backend schema exactly
       final requestData = {
         'userId': userId,
         'date': DateTime.now().toIso8601String(),
         'hittingJournal': {
-          'dialedInValue': _dialedInValue.round(),
-          'primaryFocus': _primaryFocusController.text.trim(),
-          'atBats': int.parse(_atBatsController.text.trim()),
-          'atBatsResults': _atBatsResultsController.text.trim(),
-          'somethingPositive': _somethingPositiveController.text.trim(),
-          'loggedExercises': showLogWidget && logExerciseController.text.trim().isNotEmpty
+          'pregameEngagement': _pregameEngagementValue.round(), // Backend expects this field name
+          'primaryFocus': _primaryFocusController.text.trim(), // ✓ Matches backend
+          'atBats': int.parse(_atBatsController.text.trim()), // ✓ Matches backend
+          'atBatResults': _atBatResultsController.text.trim(), // Backend expects singular 'atBatResults'
+          'positiveOutcome': _positiveOutcomeController.text.trim(), // Backend expects 'positiveOutcome'
+          'exercisesLog': showLogWidget && logExerciseController.text.trim().isNotEmpty
               ? logExerciseController.text.trim()
-              : null,
+              : null, // Backend expects 'exercisesLog' (optional)
         }
       };
 
-      // Print for debugging (you can replace this with actual API call)
+      // Print for debugging
       print('Hitting Journal Data:');
-      print('Dialed In Value: ${_dialedInValue.round()}');
+      print('Pregame Engagement: ${_pregameEngagementValue.round()}');
       print('Primary Focus: ${_primaryFocusController.text.trim()}');
       print('At Bats: ${_atBatsController.text.trim()}');
-      print('At Bats Results: ${_atBatsResultsController.text.trim()}');
-      print('Something Positive: ${_somethingPositiveController.text.trim()}');
-      print('Logged Exercises: ${logExerciseController.text.trim()}');
+      print('At Bat Results: ${_atBatResultsController.text.trim()}');
+      print('Positive Outcome: ${_positiveOutcomeController.text.trim()}');
+      print('Exercises Log: ${logExerciseController.text.trim()}');
       print('Request Data: $requestData');
 
-      // TODO: Replace with actual API call
-      // final response = await ApiService.submitHittingJournal(
-      //   request: requestData,
-      //   token: token,
-      // );
+      // Call API
+      final response = await ApiService.submitHittingJournal(
+        request: requestData,
+        token: token,
+      );
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
+      if (response == null || !response.success) {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to submit hitting journal',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
 
       // Show success message
       Get.snackbar(
@@ -277,11 +287,11 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
   // Reset form to default values
   void _resetForm() {
     setState(() {
-      _dialedInValue = 7.0;
+      _pregameEngagementValue = 7.0;
       _primaryFocusController.clear();
       _atBatsController.clear();
-      _atBatsResultsController.clear();
-      _somethingPositiveController.clear();
+      _atBatResultsController.clear();
+      _positiveOutcomeController.clear();
       logExerciseController.clear();
       showLogWidget = false;
     });
@@ -357,14 +367,14 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
                       valueIndicatorTextStyle: AppStyles.buttonTextStyle,
                     ),
                     child: Slider(
-                      value: _dialedInValue,
+                      value: _pregameEngagementValue,
                       min: 1.0,
                       max: 10.0,
                       divisions: 9,
-                      label: _dialedInValue.round().toString(),
+                      label: _pregameEngagementValue.round().toString(),
                       onChanged: (newValue) {
                         setState(() {
-                          _dialedInValue = newValue;
+                          _pregameEngagementValue = newValue;
                         });
                       },
                     ),
@@ -372,7 +382,7 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
                 ),
                 SizedBox(width: 10.w),
                 Text(
-                  _dialedInValue.round().toString(),
+                  _pregameEngagementValue.round().toString(),
                   style: AppStyles.bodyText.copyWith(fontSize: 18.sp),
                 ),
               ],
@@ -413,7 +423,7 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             ),
             SizedBox(height: 10.h),
             _buildTextField(
-              controller: _atBatsResultsController,
+              controller: _atBatResultsController,
               hintText: 'Enter today\'s results...',
               maxLines: 4,
             ),
@@ -426,7 +436,7 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
             ),
             SizedBox(height: 10.h),
             _buildTextField(
-              controller: _somethingPositiveController,
+              controller: _positiveOutcomeController,
               hintText: 'One positive thing about today...',
               maxLines: 4,
             ),

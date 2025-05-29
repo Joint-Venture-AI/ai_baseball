@@ -8,6 +8,7 @@ class NutrutionController extends GetxController {
   var feelValue = 4.0.obs;
   var proteinValue = 8.0.obs;
   var caloricValue = 3.0.obs;
+  final TextEditingController proteinIntakeController = TextEditingController();
 
   var recoverNextDay = ''.obs;
   
@@ -50,7 +51,9 @@ class NutrutionController extends GetxController {
       final nutritionRequest = NutritionRequest(
         user: currentUser.id,
         nutritionScore: feelValue.value.round(),
-        proteinScore: proteinValue.value.round(),
+        proteinScore: proteinIntakeController.text.isNotEmpty
+            ? int.tryParse(proteinIntakeController.text) ?? 0
+            : proteinValue.value.round(),
         caloricScore: caloricValue.value.round(),
         consumedImpedingSubstances: recoverNextDay.value == 'Yes',
         date: DateTime.now(),

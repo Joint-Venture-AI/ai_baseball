@@ -13,6 +13,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart'; // Add this dependency
+import 'package:baseball_ai/core/utils/image_utils.dart'; // Add this import
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -37,14 +38,22 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: cardBackground,
         elevation: 0,
-        leadingWidth: 80, // Increased width to accommodate padding + avatar
+        leadingWidth: 80,
         leading: Padding(
           padding: EdgeInsets.only(left: 16.0, bottom: 5.h),
-          child: CircleAvatar(
-            radius: 25,
-            // Replace with your actual image asset
-            backgroundImage: AssetImage(AppImages.avatarLogo), // Placeholder
-          ),
+          child: Obx(() {
+            final user = authController.currentUser.value;
+            return CircleAvatar(
+              radius: 25,
+              backgroundImage: user?.image != null && user!.image!.isNotEmpty
+                  ? NetworkImage(ImageUtils.getProfileImageUrl(user.image!))
+                  : AssetImage(AppImages.defaultProfileImage) as ImageProvider,
+              onBackgroundImageError: (exception, stackTrace) {
+                // Handle image loading error
+                print('Failed to load profile image: $exception');
+              },
+            );
+          }),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

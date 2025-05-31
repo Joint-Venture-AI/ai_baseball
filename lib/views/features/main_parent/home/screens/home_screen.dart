@@ -10,24 +10,30 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:syncfusion_flutter_charts/charts.dart'; // Add this dependency
-import 'package:baseball_ai/core/utils/image_utils.dart'; // Add this import
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:baseball_ai/core/utils/image_utils.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   // Define colors for easy reuse and modification
-  static const Color darkBackground = Color(0xFF1E1E1E); // Adjust as needed
-  static const Color cardBackground = Color(0xFF2C2C2E); // Adjust as needed
-  static const Color primaryYellow = Color(0xFFFFD60A); // Adjust as needed
+  static const Color darkBackground = Color(0xFF1E1E1E);
+  static const Color cardBackground = Color(0xFF2C2C2E);
+  static const Color primaryYellow = Color(0xFFFFD60A);
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Colors.grey;
   static const Color greenCheck = Colors.green;
   static const Color redCross = Colors.red;
-  static const Color pillarFocusBg = Color(0xFF4A4A4A); // Example color
-  static const Color pillarConsistencyBg = Color(0xFF2E7D32); // Example color
-  static const Color pillarGritBg = Color(0xFFC62828); // Example color
-  final  authController = Get.find<AuthController>();
+  static const Color pillarFocusBg = Color(0xFF4A4A4A);
+  static const Color pillarConsistencyBg = Color(0xFF2E7D32);
+  static const Color pillarGritBg = Color(0xFFC62828);
+  static const Color chartContainerBackground = Color(0xFF1A1A1A);
+  static const Color chartBackground = Colors.transparent;
+  
+  final authController = Get.find<AuthController>();
+  
+  // Add observable for view toggle
+  final RxBool isWeeklyView = true.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +54,6 @@ class HomeScreen extends StatelessWidget {
                   ? NetworkImage(ImageUtils.getProfileImageUrl(user.image!))
                   : AssetImage(AppImages.defaultProfileImage) as ImageProvider,
               onBackgroundImageError: (exception, stackTrace) {
-                // Handle image loading error
                 print('Failed to load profile image: $exception');
               },
             );
@@ -80,7 +85,6 @@ class HomeScreen extends StatelessWidget {
               child: IconButton(
                 icon: SvgPicture.asset(AppIcons.bell, color: Colors.white),
                 onPressed: () {
-                  // Handle notification tap
                   Get.to(NotificationScreen());
                 },
               ),
@@ -104,8 +108,8 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildQuickAccessButtons(),
               const SizedBox(height: 24),
-              _buildLast7DaysOverview(),
-              const SizedBox(height: 24), // Add some padding at the bottom
+              _buildOverviewSection(),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -505,7 +509,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLast7DaysOverview() {
+  Widget _buildOverviewSection() {
     return InkWell(
       onTap: () => Get.to(PerformanceScreen()),
       child: Container(
@@ -520,60 +524,112 @@ class HomeScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Last 7 Days Overview",
-                  style: TextStyle(
+                Obx(() => Text(
+                  isWeeklyView.value ? "Last 7 Days Overview" : "Last 30 Days Overview",
+                  style: const TextStyle(
                     color: textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
-                //add a switch to toggle between weekly and monthly view
-                
-
-                InkWell(
-                  onTap: () => Get.to(PerformanceScreen()),
-                  child: const Text(
-                    'Details',
-                    style: TextStyle(
-                      color: primaryYellow,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                )),
+                Row(
+                  children: [
+                    // Toggle Switch
+                    Obx(() => _buildViewToggle()),
+                    const SizedBox(width: 16),
+                    InkWell(
+                      onTap: () => Get.to(PerformanceScreen()),
+                      child: const Text(
+                        'Details',
+                        style: TextStyle(
+                          color: primaryYellow,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment
-                      .spaceBetween, // Distributes space between items
+            Obx(() => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: _buildChartPreview(
                     'Hydration',
-                    chartData1, // <-- Provide the data for the first chart
+                    isWeeklyView.value ? _getWeeklyChartData1() : _getMonthlyChartData1(),
                   ),
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 Expanded(
                   child: _buildChartPreview(
                     'Soreness',
-                    chartData2, // <-- Provide the data for the second chart
+                    isWeeklyView.value ? _getWeeklyChartData2() : _getMonthlyChartData2(),
                   ),
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 Expanded(
                   child: _buildChartPreview(
                     'Bullpen Volume',
-                    chartData3, // <-- Provide the data for the third chart
+                    isWeeklyView.value ? _getWeeklyChartData3() : _getMonthlyChartData3(),
                   ),
                 ),
               ],
-            ),
+            )),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildViewToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade800,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => isWeeklyView.value = true,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isWeeklyView.value ? primaryYellow : Colors.transparent,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text(
+                '7D',
+                style: TextStyle(
+                  color: isWeeklyView.value ? Colors.black : textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => isWeeklyView.value = false,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: !isWeeklyView.value ? primaryYellow : Colors.transparent,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text(
+                '30D',
+                style: TextStyle(
+                  color: !isWeeklyView.value ? Colors.black : textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -606,10 +662,7 @@ class HomeScreen extends StatelessWidget {
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
               backgroundColor: chartBackground,
-              // *** CORRECTED LINE HERE ***
               series: <CartesianSeries<ChartData, double>>[
-                // Or you could often use the less specific but still correct:
-                // series: <CartesianSeries>[
                 SplineAreaSeries<ChartData, double>(
                   dataSource: data,
                   xValueMapper: (ChartData sales, _) => sales.x,
@@ -626,7 +679,6 @@ class HomeScreen extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
-                  // splineType: SplineType.cardinal, // Optional
                 ),
               ],
             ),
@@ -634,5 +686,78 @@ class HomeScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Sample data methods - replace with your actual data
+  List<ChartData> _getWeeklyChartData1() {
+    return [
+      ChartData(1, 3),
+      ChartData(2, 5),
+      ChartData(3, 4),
+      ChartData(4, 7),
+      ChartData(5, 6),
+      ChartData(6, 8),
+      ChartData(7, 5),
+    ];
+  }
+
+  List<ChartData> _getMonthlyChartData1() {
+    return [
+      ChartData(1, 4),
+      ChartData(5, 6),
+      ChartData(10, 5),
+      ChartData(15, 8),
+      ChartData(20, 7),
+      ChartData(25, 6),
+      ChartData(30, 9),
+    ];
+  }
+
+  List<ChartData> _getWeeklyChartData2() {
+    return [
+      ChartData(1, 2),
+      ChartData(2, 3),
+      ChartData(3, 1),
+      ChartData(4, 4),
+      ChartData(5, 3),
+      ChartData(6, 2),
+      ChartData(7, 1),
+    ];
+  }
+
+  List<ChartData> _getMonthlyChartData2() {
+    return [
+      ChartData(1, 3),
+      ChartData(5, 2),
+      ChartData(10, 4),
+      ChartData(15, 1),
+      ChartData(20, 3),
+      ChartData(25, 2),
+      ChartData(30, 1),
+    ];
+  }
+
+  List<ChartData> _getWeeklyChartData3() {
+    return [
+      ChartData(1, 20),
+      ChartData(2, 35),
+      ChartData(3, 30),
+      ChartData(4, 45),
+      ChartData(5, 40),
+      ChartData(6, 50),
+      ChartData(7, 35),
+    ];
+  }
+
+  List<ChartData> _getMonthlyChartData3() {
+    return [
+      ChartData(1, 25),
+      ChartData(5, 40),
+      ChartData(10, 35),
+      ChartData(15, 55),
+      ChartData(20, 45),
+      ChartData(25, 50),
+      ChartData(30, 60),
+    ];
   }
 }

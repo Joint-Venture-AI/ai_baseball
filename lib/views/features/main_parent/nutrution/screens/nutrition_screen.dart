@@ -146,7 +146,7 @@ class NutritionScreen extends StatelessWidget {
                       : 'Submit',
                   onTap: nutritionController.isSubmitting.value
                       ? () {}
-                      : () => nutritionController.submitNutritionData(),
+                      : () => nutritionController.submitNutritionData(context),
                   isOutline: false,
                 )),
 

@@ -17,7 +17,7 @@ class NutrutionController extends GetxController {
   // Get AuthController instance
   AuthController get authController => Get.find<AuthController>();
 
-  Future<void> submitNutritionData() async {
+  Future<void> submitNutritionData(BuildContext context) async {
     try {
       isSubmitting.value = true;
 
@@ -65,7 +65,6 @@ class NutrutionController extends GetxController {
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
         );
-
         // Reset form values (optional)
         _resetForm();
         

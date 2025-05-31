@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:baseball_ai/core/models/daily_data_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:baseball_ai/core/utils/const/api_constants.dart';
 import 'package:baseball_ai/core/models/user_model.dart';
 import 'package:baseball_ai/core/models/chat_model.dart';
-import 'package:baseball_ai/core/models/nutrition_model.dart';
+
 import 'package:baseball_ai/core/models/daily_logs_model.dart';
 
 import '../models/daily_checkin_model.dart';
@@ -806,6 +807,55 @@ class ApiService {
       return DailyLogsResponse(
         success: false,
         message: 'Failed to submit daily logs',
+      );
+    }
+  }  
+  
+  
+  
+  static Future<DailyLogRetrievalResponse> getDailyData({
+    required String token,
+    required String userId,
+    required String date,
+  }) async {
+    try {
+      // Construct URL with proper endpoint format: daily-logs/user/{userId}/date?date={date}
+      final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dailyLogs}/user/$userId/date?date=$date');
+      
+      final response = await http.get(
+        url,
+        headers: ApiConstants.getAuthHeaders(token),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // Use fromJson to properly parse the response
+        return DailyLogRetrievalResponse.fromJson(responseData);
+      } else {
+        return DailyLogRetrievalResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to retrieve daily log data',
+          data: null, // Set data to null for error cases
+        );
+      }
+    } on SocketException {
+      return DailyLogRetrievalResponse(
+        success: false,
+        message: 'No internet connection',
+        data: null, // Set data to null for error cases
+      );
+    } on FormatException {
+      return DailyLogRetrievalResponse(
+        success: false,
+        message: 'Invalid response format',
+        data: null, // Set data to null for error cases
+      );
+    } catch (e) {
+      return DailyLogRetrievalResponse(
+        success: false,
+        message: 'Failed to retrieve daily log data: ${e.toString()}',
+        data: null, // Set data to null for error cases
       );
     }
   }

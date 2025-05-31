@@ -1,114 +1,85 @@
-import 'dart:convert';
+class PlayerPerformanceStats {
+  final int gameRating;
+  final String sessionType;
+  final String gameResults;
+  final String primaryTakeaway;
 
-// Helper function to decode JSON
-T? _decode<T>(dynamic value, T Function(Map<String, dynamic>) decode) {
-  if (value == null) return null;
-  return decode(value as Map<String, dynamic>);
-}
-
-// Helper function for list decoding (can be more specific if needed)
-List<T>? _decodeList<T>(dynamic value, T Function(dynamic) decodeItem) {
-  if (value == null) return null;
-  return (value as List).map((item) => decodeItem(item)).toList();
-}
-
-class DailyLogApiResponse {
-  final bool success;
-  final String message;
-  final DataModel data;
-
-  DailyLogApiResponse({
-    required this.success,
-    required this.message,
-    required this.data,
+  PlayerPerformanceStats({
+    required this.gameRating,
+    required this.sessionType,
+    required this.gameResults,
+    required this.primaryTakeaway,
   });
-
-  factory DailyLogApiResponse.fromJson(Map<String, dynamic> json) {
-    return DailyLogApiResponse(
-      success: json['success'] as bool,
-      message: json['message'] as String,
-      data: DataModel.fromJson(json['data'] as Map<String, dynamic>),
-    );
-  }
 
   Map<String, dynamic> toJson() {
     return {
-      'success': success,
-      'message': message,
-      'data': data.toJson(),
+      'gameRating': gameRating,
+      'sessionType': sessionType,
+      'gameResults': gameResults,
+      'primaryTakeaway': primaryTakeaway,
     };
+  }
+
+  factory PlayerPerformanceStats.fromJson(Map<String, dynamic> json) {
+    return PlayerPerformanceStats(
+      gameRating: json['gameRating'] ?? 0,
+      sessionType: json['sessionType'] ?? '',
+      gameResults: json['gameResults'] ?? '',
+      primaryTakeaway: json['primaryTakeaway'] ?? '',
+    );
   }
 }
 
-class DataModel {
-  final Visualization visualization;
-  final DailyWellnessQuestionnaire dailyWellnessQuestionnaire;
-  final ThrowingJournal throwingJournal;
-  final Nutrition nutrition;
-  final ArmCare armCare;
-  final LiftingData lifting; // Renamed for Dart conventions
-  final HittingJournal hittingJournal;
-  final PostPerformance postPerformance;
-  final String id;
+class DailyLogSubmission {
   final String userId;
   final DateTime date;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final PlayerPerformanceStats postPerformance;
 
-  DataModel({
-    required this.visualization,
-    required this.dailyWellnessQuestionnaire,
-    required this.throwingJournal,
-    required this.nutrition,
-    required this.armCare,
-    required this.lifting,
-    required this.hittingJournal,
-    required this.postPerformance,
-    required this.id,
+  DailyLogSubmission({
     required this.userId,
     required this.date,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.postPerformance,
   });
-
-  factory DataModel.fromJson(Map<String, dynamic> json) {
-    return DataModel(
-      visualization: Visualization.fromJson(json['visualization'] as Map<String, dynamic>),
-      dailyWellnessQuestionnaire: DailyWellnessQuestionnaire.fromJson(json['dailyWellnessQuestionnaire'] as Map<String, dynamic>),
-      throwingJournal: ThrowingJournal.fromJson(json['throwingJournal'] as Map<String, dynamic>),
-      nutrition: Nutrition.fromJson(json['nutrition'] as Map<String, dynamic>),
-      armCare: ArmCare.fromJson(json['armCare'] as Map<String, dynamic>),
-      lifting: LiftingData.fromJson(json['Lifting'] as Map<String, dynamic>), // Key is "Lifting"
-      hittingJournal: HittingJournal.fromJson(json['hittingJournal'] as Map<String, dynamic>),
-      postPerformance: PostPerformance.fromJson(json['postPerformance'] as Map<String, dynamic>),
-      id: json['_id'] as String,
-      userId: json['userId'] as String,
-      date: DateTime.parse(json['date'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-    );
-  }
 
   Map<String, dynamic> toJson() {
     return {
-      'visualization': visualization.toJson(),
-      'dailyWellnessQuestionnaire': dailyWellnessQuestionnaire.toJson(),
-      'throwingJournal': throwingJournal.toJson(),
-      'nutrition': nutrition.toJson(),
-      'armCare': armCare.toJson(),
-      'Lifting': lifting.toJson(), // Key is "Lifting"
-      'hittingJournal': hittingJournal.toJson(),
-      'postPerformance': postPerformance.toJson(),
-      '_id': id,
       'userId': userId,
       'date': date.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'postPerformance': postPerformance.toJson(),
     };
+  }
+
+  factory DailyLogSubmission.fromJson(Map<String, dynamic> json) {
+    return DailyLogSubmission(
+      userId: json['userId'] ?? '',
+      date: DateTime.parse(json['date']),
+      postPerformance: PlayerPerformanceStats.fromJson(json['postPerformance'] ?? {}),
+    );
   }
 }
 
-class Visualization {
+class DailyLogEntriesResponse {
+  final bool success;
+  final String message;
+  final Map<String, dynamic>? data;
+
+  DailyLogEntriesResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  factory DailyLogEntriesResponse.fromJson(Map<String, dynamic> json) {
+    return DailyLogEntriesResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      data: json['data'],
+    );
+  }
+}
+
+// New comprehensive model for daily logs retrieval API response
+class VisualRepresentation {
   final bool gameEnvironment;
   final int gameEnvironmentTime;
   final bool gameExecution;
@@ -118,7 +89,7 @@ class Visualization {
   final bool boxBreathing;
   final int boxBreathingTime;
 
-  Visualization({
+  VisualRepresentation({
     required this.gameEnvironment,
     required this.gameEnvironmentTime,
     required this.gameExecution,
@@ -129,16 +100,16 @@ class Visualization {
     required this.boxBreathingTime,
   });
 
-  factory Visualization.fromJson(Map<String, dynamic> json) {
-    return Visualization(
-      gameEnvironment: json['gameEnvironment'] as bool,
-      gameEnvironmentTime: json['gameEnvironmentTime'] as int,
-      gameExecution: json['gameExecution'] as bool,
-      gameExecutionTime: json['gameExecutionTime'] as int,
-      pregameRoutine: json['pregameRoutine'] as bool,
-      pregameRoutineTime: json['pregameRoutineTime'] as int,
-      boxBreathing: json['boxBreathing'] as bool,
-      boxBreathingTime: json['boxBreathingTime'] as int,
+  factory VisualRepresentation.fromJson(Map<String, dynamic> json) {
+    return VisualRepresentation(
+      gameEnvironment: json['gameEnvironment'] ?? false,
+      gameEnvironmentTime: json['gameEnvironmentTime'] ?? 0,
+      gameExecution: json['gameExecution'] ?? false,
+      gameExecutionTime: json['gameExecutionTime'] ?? 0,
+      pregameRoutine: json['pregameRoutine'] ?? false,
+      pregameRoutineTime: json['pregameRoutineTime'] ?? 0,
+      boxBreathing: json['boxBreathing'] ?? false,
+      boxBreathingTime: json['boxBreathingTime'] ?? 0,
     );
   }
 
@@ -156,7 +127,7 @@ class Visualization {
   }
 }
 
-class DailyWellnessQuestionnaire {
+class WellnessAssessmentModel {
   final String feeling;
   final int soreness;
   final DateTime sleepTime;
@@ -164,7 +135,7 @@ class DailyWellnessQuestionnaire {
   final int hydrationLevel;
   final int readinessToCompete;
 
-  DailyWellnessQuestionnaire({
+  WellnessAssessmentModel({
     required this.feeling,
     required this.soreness,
     required this.sleepTime,
@@ -173,14 +144,14 @@ class DailyWellnessQuestionnaire {
     required this.readinessToCompete,
   });
 
-  factory DailyWellnessQuestionnaire.fromJson(Map<String, dynamic> json) {
-    return DailyWellnessQuestionnaire(
-      feeling: json['feeling'] as String,
-      soreness: json['soreness'] as int,
-      sleepTime: DateTime.parse(json['sleepTime'] as String),
-      wakeUpTime: DateTime.parse(json['wakeUpTime'] as String),
-      hydrationLevel: json['hydrationLevel'] as int,
-      readinessToCompete: json['readinessToCompete'] as int,
+  factory WellnessAssessmentModel.fromJson(Map<String, dynamic> json) {
+    return WellnessAssessmentModel(
+      feeling: json['feeling'] ?? '',
+      soreness: json['soreness'] ?? 0,
+      sleepTime: DateTime.parse(json['sleepTime'] ?? DateTime.now().toIso8601String()),
+      wakeUpTime: DateTime.parse(json['wakeUpTime'] ?? DateTime.now().toIso8601String()),
+      hydrationLevel: json['hydrationLevel'] ?? 0,
+      readinessToCompete: json['readinessToCompete'] ?? 0,
     );
   }
 
@@ -196,7 +167,7 @@ class DailyWellnessQuestionnaire {
   }
 }
 
-class ThrowingJournal {
+class ThrowingActivityRecord {
   final List<String> drills;
   final String toolsDescription;
   final String setsAndReps;
@@ -205,7 +176,7 @@ class ThrowingJournal {
   final String focus;
   final String environment;
 
-  ThrowingJournal({
+  ThrowingActivityRecord({
     required this.drills,
     required this.toolsDescription,
     required this.setsAndReps,
@@ -215,15 +186,15 @@ class ThrowingJournal {
     required this.environment,
   });
 
-  factory ThrowingJournal.fromJson(Map<String, dynamic> json) {
-    return ThrowingJournal(
-      drills: List<String>.from(json['drills'] as List),
-      toolsDescription: json['toolsDescription'] as String,
-      setsAndReps: json['setsAndReps'] as String,
-      longTossDistance: json['longTossDistance'] as int,
-      pitchCount: json['pitchCount'] as int,
-      focus: json['focus'] as String,
-      environment: json['environment'] as String,
+  factory ThrowingActivityRecord.fromJson(Map<String, dynamic> json) {
+    return ThrowingActivityRecord(
+      drills: List<String>.from(json['drills'] ?? []),
+      toolsDescription: json['toolsDescription'] ?? '',
+      setsAndReps: json['setsAndReps'] ?? '',
+      longTossDistance: json['longTossDistance'] ?? 0,
+      pitchCount: json['pitchCount'] ?? 0,
+      focus: json['focus'] ?? '',
+      environment: json['environment'] ?? '',
     );
   }
 
@@ -240,25 +211,25 @@ class ThrowingJournal {
   }
 }
 
-class Nutrition {
+class NutritionalInfo {
   final double nutritionScore;
-  final int proteinInGram; // Assuming int based on value 20
+  final int proteinInGram;
   final double caloricScore;
   final bool consumedImpedingSubstances;
 
-  Nutrition({
+  NutritionalInfo({
     required this.nutritionScore,
     required this.proteinInGram,
     required this.caloricScore,
     required this.consumedImpedingSubstances,
   });
 
-  factory Nutrition.fromJson(Map<String, dynamic> json) {
-    return Nutrition(
-      nutritionScore: (json['nutritionScore'] as num).toDouble(),
-      proteinInGram: json['proteinInGram'] as int,
-      caloricScore: (json['caloricScore'] as num).toDouble(),
-      consumedImpedingSubstances: json['consumedImpedingSubstances'] as bool,
+  factory NutritionalInfo.fromJson(Map<String, dynamic> json) {
+    return NutritionalInfo(
+      nutritionScore: (json['nutritionScore'] ?? 0).toDouble(),
+      proteinInGram: json['proteinInGram'] ?? 0,
+      caloricScore: (json['caloricScore'] ?? 0).toDouble(),
+      consumedImpedingSubstances: json['consumedImpedingSubstances'] ?? false,
     );
   }
 
@@ -272,25 +243,25 @@ class Nutrition {
   }
 }
 
-class ArmCare {
+class ArmRecoveryMetrics {
   final List<String> focus;
   final String exerciseType;
   final List<String> recoveryModalities;
   final String exercisesLog;
 
-  ArmCare({
+  ArmRecoveryMetrics({
     required this.focus,
     required this.exerciseType,
     required this.recoveryModalities,
     required this.exercisesLog,
   });
 
-  factory ArmCare.fromJson(Map<String, dynamic> json) {
-    return ArmCare(
-      focus: List<String>.from(json['focus'] as List),
-      exerciseType: json['exerciseType'] as String,
-      recoveryModalities: List<String>.from(json['recoveryModalities'] as List),
-      exercisesLog: json['exercisesLog'] as String,
+  factory ArmRecoveryMetrics.fromJson(Map<String, dynamic> json) {
+    return ArmRecoveryMetrics(
+      focus: List<String>.from(json['focus'] ?? []),
+      exerciseType: json['exerciseType'] ?? '',
+      recoveryModalities: List<String>.from(json['recoveryModalities'] ?? []),
+      exercisesLog: json['exercisesLog'] ?? '',
     );
   }
 
@@ -304,22 +275,22 @@ class ArmCare {
   }
 }
 
-class LiftingData { // Renamed from "Lifting"
+class WeightliftingMetrics {
   final List<String> liftingType;
   final List<String> focus;
-  final String? exercisesLog; // Nullable
+  final String? exercisesLog;
 
-  LiftingData({
+  WeightliftingMetrics({
     required this.liftingType,
     required this.focus,
-    this.exercisesLog, // Nullable
+    this.exercisesLog,
   });
 
-  factory LiftingData.fromJson(Map<String, dynamic> json) {
-    return LiftingData(
-      liftingType: List<String>.from(json['liftingType'] as List),
-      focus: List<String>.from(json['focus'] as List),
-      exercisesLog: json['exercisesLog'] as String?, // Nullable
+  factory WeightliftingMetrics.fromJson(Map<String, dynamic> json) {
+    return WeightliftingMetrics(
+      liftingType: List<String>.from(json['liftingType'] ?? []),
+      focus: List<String>.from(json['focus'] ?? []),
+      exercisesLog: json['exercisesLog'],
     );
   }
 
@@ -332,31 +303,31 @@ class LiftingData { // Renamed from "Lifting"
   }
 }
 
-class HittingJournal {
+class HittingActivityLog {
   final int pregameEngagement;
   final String primaryFocus;
   final int atBats;
   final String atBatResults;
   final String positiveOutcome;
-  final String? exercisesLog; // Nullable
+  final String? exercisesLog;
 
-  HittingJournal({
+  HittingActivityLog({
     required this.pregameEngagement,
     required this.primaryFocus,
     required this.atBats,
     required this.atBatResults,
     required this.positiveOutcome,
-    this.exercisesLog, // Nullable
+    this.exercisesLog,
   });
 
-  factory HittingJournal.fromJson(Map<String, dynamic> json) {
-    return HittingJournal(
-      pregameEngagement: json['pregameEngagement'] as int,
-      primaryFocus: json['primaryFocus'] as String,
-      atBats: json['atBats'] as int,
-      atBatResults: json['atBatResults'] as String,
-      positiveOutcome: json['positiveOutcome'] as String,
-      exercisesLog: json['exercisesLog'] as String?, // Nullable
+  factory HittingActivityLog.fromJson(Map<String, dynamic> json) {
+    return HittingActivityLog(
+      pregameEngagement: json['pregameEngagement'] ?? 0,
+      primaryFocus: json['primaryFocus'] ?? '',
+      atBats: json['atBats'] ?? 0,
+      atBatResults: json['atBatResults'] ?? '',
+      positiveOutcome: json['positiveOutcome'] ?? '',
+      exercisesLog: json['exercisesLog'],
     );
   }
 
@@ -372,137 +343,116 @@ class HittingJournal {
   }
 }
 
-class PostPerformance {
-  final int gameRating;
-  final String sessionType;
-  final String gameResults;
-  final String primaryTakeaway;
+class DailyActivityLog {
+  final VisualRepresentation? visualization;
+  final WellnessAssessmentModel? dailyWellnessQuestionnaire;
+  final ThrowingActivityRecord? throwingJournal;
+  final NutritionalInfo? nutrition;
+  final ArmRecoveryMetrics? armCare;
+  final WeightliftingMetrics? lifting;
+  final HittingActivityLog? hittingJournal;
+  final PlayerPerformanceStats? postPerformance;
+  final String id;
+  final String userId;
+  final DateTime date;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  PostPerformance({
-    required this.gameRating,
-    required this.sessionType,
-    required this.gameResults,
-    required this.primaryTakeaway,
+  DailyActivityLog({
+    this.visualization,
+    this.dailyWellnessQuestionnaire,
+    this.throwingJournal,
+    this.nutrition,
+    this.armCare,
+    this.lifting,
+    this.hittingJournal,
+    this.postPerformance,
+    required this.id,
+    required this.userId,
+    required this.date,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  factory PostPerformance.fromJson(Map<String, dynamic> json) {
-    return PostPerformance(
-      gameRating: json['gameRating'] as int,
-      sessionType: json['sessionType'] as String,
-      gameResults: json['gameResults'] as String,
-      primaryTakeaway: json['primaryTakeaway'] as String,
+  factory DailyActivityLog.fromJson(Map<String, dynamic> json) {
+    return DailyActivityLog(
+      visualization: json['visualization'] != null
+          ? VisualRepresentation.fromJson(json['visualization'])
+          : null,
+      dailyWellnessQuestionnaire: json['dailyWellnessQuestionnaire'] != null
+          ? WellnessAssessmentModel.fromJson(json['dailyWellnessQuestionnaire'])
+          : null,
+      throwingJournal: json['throwingJournal'] != null
+          ? ThrowingActivityRecord.fromJson(json['throwingJournal'])
+          : null,
+      nutrition: json['nutrition'] != null
+          ? NutritionalInfo.fromJson(json['nutrition'])
+          : null,
+      armCare: json['armCare'] != null
+          ? ArmRecoveryMetrics.fromJson(json['armCare'])
+          : null,
+      lifting: json['Lifting'] != null // Note: API uses "Lifting" with capital L
+          ? WeightliftingMetrics.fromJson(json['Lifting'])
+          : null,
+      hittingJournal: json['hittingJournal'] != null
+          ? HittingActivityLog.fromJson(json['hittingJournal'])
+          : null,
+      postPerformance: json['postPerformance'] != null
+          ? PlayerPerformanceStats.fromJson(json['postPerformance'])
+          : null,
+      id: json['_id'] ?? '',
+      userId: json['userId'] ?? '',
+      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'gameRating': gameRating,
-      'sessionType': sessionType,
-      'gameResults': gameResults,
-      'primaryTakeaway': primaryTakeaway,
+      'visualization': visualization?.toJson(),
+      'dailyWellnessQuestionnaire': dailyWellnessQuestionnaire?.toJson(),
+      'throwingJournal': throwingJournal?.toJson(),
+      'nutrition': nutrition?.toJson(),
+      'armCare': armCare?.toJson(),
+      'Lifting': lifting?.toJson(), // Note: API uses "Lifting" with capital L
+      'hittingJournal': hittingJournal?.toJson(),
+      'postPerformance': postPerformance?.toJson(),
+      '_id': id,
+      'userId': userId,
+      'date': date.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }
 
-// Example Usage:
-void main() {
-  const String jsonString = '''
-  {
-      "success": true,
-      "message": "Daily log retrieved successfully",
-      "data": {
-          "visualization": {
-              "gameEnvironment": false,
-              "gameEnvironmentTime": 0,
-              "gameExecution": false,
-              "gameExecutionTime": 0,
-              "pregameRoutine": false,
-              "pregameRoutineTime": 0,
-              "boxBreathing": true,
-              "boxBreathingTime": 0
-          },
-          "dailyWellnessQuestionnaire": {
-              "feeling": "rtyrty",
-              "soreness": 4,
-              "sleepTime": "2025-05-29T09:41:00.000Z",
-              "wakeUpTime": "2025-05-29T04:41:00.000Z",
-              "hydrationLevel": 3,
-              "readinessToCompete": 5
-          },
-          "throwingJournal": {
-              "drills": [
-                  "erter"
-              ],
-              "toolsDescription": "erter",
-              "setsAndReps": "ertert",
-              "longTossDistance": 22,
-              "pitchCount": 25,
-              "focus": "ert",
-              "environment": "InGame"
-          },
-          "nutrition": {
-              "nutritionScore": 6.666666666666666,
-              "proteinInGram": 20,
-              "caloricScore": 2.2222222222222223,
-              "consumedImpedingSubstances": true
-          },
-          "armCare": {
-              "focus": [
-                  "Scapular",
-                  "Forearms"
-              ],
-              "exerciseType": "Isometric",
-              "recoveryModalities": [
-                  "Hot tub",
-                  "dsfsd"
-              ],
-              "exercisesLog": "sdfsdf"
-          },
-          "Lifting": {
-              "liftingType": [
-                  "Upper Body"
-              ],
-              "focus": [
-                  "Speed"
-              ],
-              "exercisesLog": null
-          },
-          "hittingJournal": {
-              "pregameEngagement": 4,
-              "primaryFocus": "dsfs",
-              "atBats": 222,
-              "atBatResults": "sdfsdf",
-              "positiveOutcome": "sdfsdf",
-              "exercisesLog": null
-          },
-          "postPerformance": {
-              "gameRating": 4,
-              "sessionType": "Bullpen/Live at-bats",
-              "gameResults": "skip",
-              "primaryTakeaway": "nothing's"
-          },
-          "_id": "6837c663f90c344364e4abe9",
-          "userId": "6833ce9bfc148b0f93e81f5b",
-          "date": "2025-05-29T08:28:49.725Z",
-          "createdAt": "2025-05-29T02:28:51.641Z",
-          "updatedAt": "2025-05-29T08:34:29.875Z"
-      }
+class DailyLogRetrievalResponse {
+  final bool success;
+  final String message;
+  final DailyActivityLog? data;
+
+  DailyLogRetrievalResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  factory DailyLogRetrievalResponse.fromJson(Map<String, dynamic> json) {
+    return DailyLogRetrievalResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      data: json['data'] != null
+          ? DailyActivityLog.fromJson(json['data'])
+          : null,
+    );
   }
-  ''';
 
-  final Map<String, dynamic> jsonData = json.decode(jsonString) as Map<String, dynamic>;
-  final apiResponse = DailyLogApiResponse.fromJson(jsonData);
-
-  print('Success: ${apiResponse.success}');
-  print('Message: ${apiResponse.message}');
-  print('User ID: ${apiResponse.data.userId}');
-  print('Lifting Exercise Log: ${apiResponse.data.lifting.exercisesLog}'); // Should be null
-  print('Hitting Exercise Log: ${apiResponse.data.hittingJournal.exercisesLog}'); // Should be null
-  print('Sleep Time: ${apiResponse.data.dailyWellnessQuestionnaire.sleepTime}');
-  print('Nutrition Score: ${apiResponse.data.nutrition.nutritionScore}');
-
-  // Example of converting back to JSON
-  final String newJsonString = json.encode(apiResponse.toJson());
-  print('\nRe-encoded JSON:');
-  print(newJsonString);
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'message': message,
+      'data': data?.toJson(),
+    };
+  }
 }

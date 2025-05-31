@@ -1,3 +1,4 @@
+import 'package:baseball_ai/core/models/daily_data_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -16,6 +17,7 @@ class AuthController extends GetxController {
   final RxBool isVerifyEmailLoading = false.obs;
   final RxBool isResetPasswordLoading = false.obs;
 
+
   // User data
   final Rx<User?> currentUser = Rx<User?>(null);
   final RxString accessToken = ''.obs;
@@ -32,6 +34,11 @@ class AuthController extends GetxController {
   final TextEditingController otpController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final Rx<DailyLogRetrievalResponse> dailyLogResponse = DailyLogRetrievalResponse(
+    success: false,
+    message: '',
+    data: null,
+  ).obs;
 
   @override
   void onClose() {
@@ -50,7 +57,59 @@ class AuthController extends GetxController {
     super.onInit();
     // Initialize storage and load saved token
     _loadSavedToken();
+    
   }
+
+  void loadProgress( ) async{
+    String token = accessToken.value;
+    print('Loading progress with token: $token');
+    String userId = currentUser.value?.id ?? '';
+    print('User ID: $userId');
+    String date = DateTime.now().toIso8601String(); 
+    print('Date: $date');
+    try {
+
+      ApiService.getDailyData(
+        token: token,
+        userId: userId,
+        date: date,
+      ).then((response) {
+        if (response.success && response.data != null) {
+          dailyLogResponse.value = response;
+          print('Daily Data Loaded: ${response.data}');
+          // You can update your UI or state here with the loaded data
+        } else {
+          print('Failed to load daily data: ${response.message}');
+          dailyLogResponse.value = DailyLogRetrievalResponse(
+            success: false,
+            message: response.message,
+            data: null,
+          );
+        }
+      }).catchError((error) {
+        Get.snackbar(
+          'Error',
+          'Failed to load progress: ${error.toString()}',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
+      });
+      
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to load progress: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      
+    }
+
+
+  }
+
 
   // Token storage methods
   void _saveToken(String token) {

@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart'; // Add this dependency
 import 'package:baseball_ai/core/utils/image_utils.dart'; // Add this import
@@ -33,6 +31,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    authController.loadProgress();
     return Scaffold(
       backgroundColor: darkBackground,
       appBar: AppBar(
@@ -117,54 +116,75 @@ class HomeScreen extends StatelessWidget {
   // --- Helper Widgets ---
 
   Widget _buildCompletionSection() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: cardBackground,
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Today's Completion",
+    return Obx(
+       () {
+        bool wellnessLogResponse = (authController.dailyLogResponse.value.data?.dailyWellnessQuestionnaire?.isBlank ?? true)?
+            false : true;
+        bool throwingJournalResponse = (authController.dailyLogResponse.value.data?.throwingJournal?.isBlank ?? true)?
+            false : true;
+        bool armCareResponse = (authController.dailyLogResponse.value.data?.armCare?.isBlank ?? true)?
+            false : true;
+
+
+        double _percantageCalculation() {
+          int completedTasks = 0;
+          if (wellnessLogResponse) completedTasks++;
+          if (throwingJournalResponse) completedTasks++;
+          if (armCareResponse) completedTasks++;
+
+          double percentage = completedTasks / 3; // Total tasks = 3
+          return percentage;
+        }
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: cardBackground,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Today's Completion",
+                      style: TextStyle(
+                        color: textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTaskItem('Wellness Log', wellnessLogResponse),
+                    const SizedBox(height: 8),
+                    _buildTaskItem('Throwing Journal', throwingJournalResponse),
+                    const SizedBox(height: 8),
+                     _buildTaskItem('Arm Care', armCareResponse),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              CircularPercentIndicator(
+                radius: 50.0,
+                lineWidth: 10.0,
+                percent: _percantageCalculation(),
+                center:  Text(
+                  '${(_percantageCalculation() * 100).toStringAsFixed(0)}%',
                   style: TextStyle(
-                    color: textPrimary,
-                    fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    color: textPrimary,
                   ),
                 ),
-                const SizedBox(height: 12),
-                _buildTaskItem('Wellness Log', true),
-                const SizedBox(height: 8),
-                _buildTaskItem('Throwing Journal', false),
-                const SizedBox(height: 8),
-                _buildTaskItem('Arm Care', false),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          CircularPercentIndicator(
-            radius: 50.0,
-            lineWidth: 10.0,
-            percent: 0.62,
-            center: const Text(
-              "62%",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-                color: textPrimary,
+                progressColor: primaryYellow,
+                backgroundColor: Colors.grey.shade700,
+                circularStrokeCap: CircularStrokeCap.round,
               ),
-            ),
-            progressColor: primaryYellow,
-            backgroundColor: Colors.grey.shade700,
-            circularStrokeCap: CircularStrokeCap.round,
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 
@@ -269,7 +289,7 @@ class HomeScreen extends StatelessWidget {
               Obx(
               () {
                   return _buildPillarChip(
-                   authController.currentUser.value?.threeWordThtDescribeYou.split(',').first ??'Focus',
+                   authController.currentUser.value?.threeWordThtDescribeYou.split(',').first.capitalize ??'Focus',
                     Icons.track_changes,
                     pillarFocusBg,
                   );
@@ -278,7 +298,7 @@ class HomeScreen extends StatelessWidget {
               Obx(
                 () {
                   return _buildPillarChip(
-                   authController.currentUser.value?.threeWordThtDescribeYou.split(',')[1] ?? 'Consistency',
+                   authController.currentUser.value?.threeWordThtDescribeYou.split(',')[1].capitalize ?? 'Consistency',
                     Icons.sync_alt,
                     pillarConsistencyBg,
                   );
@@ -287,7 +307,7 @@ class HomeScreen extends StatelessWidget {
               Obx(
                 () {
                   return _buildPillarChip(
-                   authController.currentUser.value?.threeWordThtDescribeYou.split(',')[2] ?? 'Grit',
+                   authController.currentUser.value?.threeWordThtDescribeYou.split(',')[2].capitalize ?? 'Grit',
                     Icons.whatshot,
                     pillarGritBg,
                   );
@@ -508,6 +528,9 @@ class HomeScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                //add a switch to toggle between weekly and monthly view
+                
+
                 InkWell(
                   onTap: () => Get.to(PerformanceScreen()),
                   child: const Text(

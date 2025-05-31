@@ -2,6 +2,8 @@ import 'package:baseball_ai/views/glob_widgets/my_button.dart';
 import 'package:baseball_ai/views/features/main_parent/profile/controller/profile_controller.dart';
 import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 import 'package:baseball_ai/core/utils/theme/app_styles.dart';
+import 'package:baseball_ai/core/utils/image_utils.dart'; // Add this import
+import 'package:baseball_ai/core/utils/const/app_images.dart'; // Add this import
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -71,27 +73,55 @@ class _EditProfileState extends State<EditProfile> {
             Center(
               child: Stack(
                 children: [
-                  Obx(() => Container(
-                    width: 100.w,
-                    height: 100.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppStyles.cardColor,
-                      border: Border.all(color: AppStyles.primaryColor, width: 2),
-                    ),
-                    child: controller.pickedImage.value != null
-                        ? ClipOval(
-                            child: Image.file(
-                              controller.pickedImage.value!,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Icon(
-                            Icons.person,
-                            size: 50.w,
-                            color: AppStyles.primaryColor,
-                          ),
-                  )),
+                  Obx(() {
+                    final pickedImage = controller.pickedImage.value;
+                    final user = authController.currentUser.value;
+                    
+                    return Container(
+                      width: 100.w,
+                      height: 100.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppStyles.cardColor,
+                        border: Border.all(color: AppStyles.primaryColor, width: 2),
+                      ),
+                      child: ClipOval(
+                        child: pickedImage != null
+                            ? Image.file(
+                                pickedImage,
+                                fit: BoxFit.cover,
+                              )
+                            : user?.image != null && user!.image!.isNotEmpty
+                                ? Image.network(
+                                    ImageUtils.getProfileImageUrl(user.image!),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.person,
+                                        size: 50.w,
+                                        color: AppStyles.primaryColor,
+                                      );
+                                    },
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          color: AppStyles.primaryColor,
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    size: 50.w,
+                                    color: AppStyles.primaryColor,
+                                  ),
+                      ));
+                  }),
                   Positioned(
                     bottom: 0,
                     right: 0,

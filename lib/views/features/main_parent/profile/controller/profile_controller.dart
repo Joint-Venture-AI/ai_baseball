@@ -69,7 +69,7 @@ class ProfileController extends GetxController {
         );
 
         // Go back to profile screen
-        Get.back();
+        // Get.back();
         
       } else {
         Get.snackbar(

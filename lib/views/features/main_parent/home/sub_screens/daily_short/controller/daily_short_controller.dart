@@ -180,7 +180,7 @@ class DailyController extends GetxController {
         _resetForm();
 
         // Navigate back or to home
-        Get.back();
+        // Get.back();
       } else {
         // Show error message
         Get.snackbar(

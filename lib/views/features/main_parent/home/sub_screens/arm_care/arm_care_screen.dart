@@ -329,8 +329,11 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
           colorText: Colors.white,
         );
         return;
-      }else{
-        print('Arm care data submitted successfully: ${response.message}');
+      }
+        
+   
+
+     print('Arm care data submitted successfully: ${response.message}');
          // Show success message
         Get.snackbar(
           'Success',
@@ -340,14 +343,11 @@ class _ArmCareScreenState extends State<ArmCareScreen> {
           colorText: Colors.white,
         );
 
-      }
-
-     
       // Reset form
       _resetForm();
 
       // Navigate back
-      Get.back();
+      // Get.back();
 
     } catch (e) {
       // Handle unexpected errors

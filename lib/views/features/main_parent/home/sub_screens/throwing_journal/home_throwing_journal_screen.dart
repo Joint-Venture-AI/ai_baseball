@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../notification_screen.dart';
-import '../controller/throwing_journal_controller.dart';
+import '../notification_screen.dart';
+import 'throwing_journal_controller.dart';
 
 // Assuming AppStyles exists in your project like this:
 class AppStyles {

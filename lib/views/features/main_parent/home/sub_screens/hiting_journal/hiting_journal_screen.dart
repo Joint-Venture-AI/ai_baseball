@@ -265,8 +265,8 @@ class _HittingJournalScreenState extends State<HittingJournalScreen> {
       // Reset form
       _resetForm();
 
-      // Navigate back
-      Get.back();
+      // // Navigate back
+      // Get.back();
 
     } catch (e) {
       // Handle unexpected errors

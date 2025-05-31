@@ -266,20 +266,32 @@ class HomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildPillarChip(
-               authController.currentUser.value?.threeWordThtDescribeYou.split(',').first ??'Focus',
-                Icons.track_changes,
-                pillarFocusBg,
+              Obx(
+              () {
+                  return _buildPillarChip(
+                   authController.currentUser.value?.threeWordThtDescribeYou.split(',').first ??'Focus',
+                    Icons.track_changes,
+                    pillarFocusBg,
+                  );
+                }
               ), // Example Icon
-              _buildPillarChip(
-               authController.currentUser.value?.threeWordThtDescribeYou.split(',')[1] ?? 'Consistency',
-                Icons.sync_alt,
-                pillarConsistencyBg,
+              Obx(
+                () {
+                  return _buildPillarChip(
+                   authController.currentUser.value?.threeWordThtDescribeYou.split(',')[1] ?? 'Consistency',
+                    Icons.sync_alt,
+                    pillarConsistencyBg,
+                  );
+                }
               ), // Example Icon
-              _buildPillarChip(
-               authController.currentUser.value?.threeWordThtDescribeYou.split(',')[2] ?? 'Grit',
-                Icons.whatshot,
-                pillarGritBg,
+              Obx(
+                () {
+                  return _buildPillarChip(
+                   authController.currentUser.value?.threeWordThtDescribeYou.split(',')[2] ?? 'Grit',
+                    Icons.whatshot,
+                    pillarGritBg,
+                  );
+                }
               ), // Example Icon
             ],
           ),

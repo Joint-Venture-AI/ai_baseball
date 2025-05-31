@@ -12,7 +12,7 @@ import 'package:baseball_ai/views/features/main_parent/bottom_nav/main_parent_sc
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/arm_care/arm_care_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/bindings/home_sub_binding.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_short/screens/daily_screen.dart';
-import 'package:baseball_ai/views/features/main_parent/home/sub_screens/daily_short/screens/home_throwing_journal_screen.dart';
+import 'package:baseball_ai/views/features/main_parent/home/sub_screens/throwing_journal/home_throwing_journal_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/hiting_journal/hiting_journal_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/lifting/lifting_screen.dart';
 import 'package:baseball_ai/views/features/main_parent/home/sub_screens/performance/performance_screen.dart';

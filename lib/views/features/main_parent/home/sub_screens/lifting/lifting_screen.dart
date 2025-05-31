@@ -243,7 +243,7 @@ class _LiftingScreenState extends State<LiftingScreen> {
       _resetForm();
 
       // Navigate back
-      Get.back();
+      // Get.back();
 
     } catch (e) {
       // Handle unexpected errors

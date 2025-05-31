@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:baseball_ai/views/features/auth/controller/auth_controller.dart';
 
-import '../../../../../../../core/services/api_service.dart';
+import '../../../../../../core/services/api_service.dart';
 
 // Enum for the radio button choices
 enum WorkloadEnvironment { controlled, inGame }
@@ -165,9 +165,12 @@ class ThrowingJournalController extends GetxController {
           colorText: Colors.white,
         );
         return;
-      }else{
+      }
          // Show success message
-        Get.snackbar(
+       
+      
+
+      Get.snackbar(
           'Success',
           'Throwing journal submitted successfully!',
           snackPosition: SnackPosition.BOTTOM,
@@ -175,15 +178,12 @@ class ThrowingJournalController extends GetxController {
           colorText: Colors.white,
         );
 
-      }
-
-     
 
       // Reset form
       _resetForm();
 
       // Navigate back
-      Get.back();
+      // Get.back();
 
     } catch (e) {
       // Handle unexpected errors
